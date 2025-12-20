@@ -6,9 +6,11 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from blocky import Blocky, BlockyWebSocket, CircuitBreakerOpen
 from price_model import PriceModel
+from spread_calculator import SpreadCalculator, SpreadConfig
 from metrics import MetricsTracker
 from alerts import AlertManager, AlertLevel
 from config import get_config
+from health import HealthServer
 
 # Load environment variables from .env file
 load_dotenv(override=True)
@@ -45,11 +47,11 @@ API_KEY = config.api.api_key
 if not API_KEY:
     raise RuntimeError("BLOCKY_API_KEY environment variable is not set. Please set it before running the bot.")
 API_ENDPOINT = config.api.endpoint
-SPREAD = config.trading.spread
 TARGET_VALUE = config.trading.target_value
 MAX_QUANTITY = config.trading.max_quantity
 REFRESH_INTERVAL = config.trading.refresh_interval
 MIN_SPREAD_TICKS = config.trading.min_spread_ticks
+FALLBACK_SPREAD = config.trading.spread  # Used when dynamic spread is disabled
 
 class MarketMaker:
     def __init__(self, api_key: str, endpoint: str):
@@ -84,6 +86,21 @@ class MarketMaker:
         
         # Trade tracking for metrics
         self.last_trade_cursor = None  # Track last processed trade ID
+        
+        # Dynamic Spread Calculator
+        spread_config = SpreadConfig(
+            enabled=config.dynamic_spread.enabled,
+            base_spread=config.dynamic_spread.base_spread,
+            volatility_multiplier=config.dynamic_spread.volatility_multiplier,
+            inventory_impact=config.dynamic_spread.inventory_impact,
+            min_spread=config.dynamic_spread.min_spread,
+            max_spread=config.dynamic_spread.max_spread,
+            volatility_window=config.dynamic_spread.volatility_window
+        )
+        self.spread_calculator = SpreadCalculator(self.client, spread_config)
+        
+        if spread_config.enabled:
+            logger.info("📊 Dynamic spread calculation enabled")
 
     async def _on_event_update(self, data: dict):
         """Callback for real-time events (Trade or Orderbook)."""
@@ -135,15 +152,32 @@ class MarketMaker:
         return await loop.run_in_executor(None, partial(func, *args, **kwargs))
 
     def _fetch_markets(self) -> List[str]:
+        """Fetches available markets from the API and applies config filters."""
         logger.info("Fetching available markets...")
         try:
             # this is called in __init__, so it can stay sync blocking or we need to move it to a factory/run method
             # For now it's in init, so keep sync.
             response = self.client.get_markets()
             if response.get("success"):
-                markets = [m["market"] for m in response.get("markets", [])]
-                logger.info(f"Found {len(markets)} markets: {markets}")
-                return markets
+                all_markets = [m["market"] for m in response.get("markets", [])]
+                
+                # Apply whitelist (if specified)
+                if config.trading.enabled_markets:
+                    filtered = [m for m in all_markets if m in config.trading.enabled_markets]
+                    logger.info(f"Whitelist active: {len(filtered)}/{len(all_markets)} markets enabled")
+                else:
+                    filtered = all_markets
+                
+                # Apply blacklist (always)
+                if config.trading.disabled_markets:
+                    before_count = len(filtered)
+                    filtered = [m for m in filtered if m not in config.trading.disabled_markets]
+                    disabled_count = before_count - len(filtered)
+                    if disabled_count > 0:
+                        logger.info(f"Blacklist active: {disabled_count} markets disabled")
+                
+                logger.info(f"Found {len(filtered)} markets: {filtered}")
+                return filtered
         except Exception as e:
             logger.error(f"Failed to fetch markets: {e}")
         return []
@@ -312,9 +346,23 @@ class MarketMaker:
                 if mid_price == 0:
                     return
     
-                # Standard Spread
-                buy_price = round(mid_price * (1 - SPREAD / 2), 2)
-                sell_price = round(mid_price * (1 + SPREAD / 2), 2)
+                # Calculate Dynamic Spread
+                base, quote = market.split('_')  # e.g. ston, iron
+                base_inventory = self.wallets.get(base.lower(), 0)
+                
+                # Get asymmetric spreads based on volatility + inventory
+                buy_spread, sell_spread = self.spread_calculator.get_dynamic_spread(
+                    market, 
+                    inventory=base_inventory,
+                    ticker=ticker
+                )
+                
+                # Calculate prices using dynamic spreads
+                buy_price = round(mid_price * (1 - buy_spread / 2), 2)
+                sell_price = round(mid_price * (1 + sell_spread / 2), 2)
+                
+                # Log dynamic spread for first few markets (debug)
+                logger.debug(f"{market}: Dynamic spread buy={buy_spread:.2%} sell={sell_spread:.2%}")
 
                 # COMPETITIVE STRATEGY (Pennying)
                 # Beat best bid/ask by 0.01 if it leaves us with > 1% profit margin from Mid Price
@@ -380,8 +428,7 @@ class MarketMaker:
                      buy_price = round(buy_price, 2)
                      sell_price = round(sell_price, 2)
     
-                # 2. Check Inventory
-                base, quote = market.split('_') # e.g. ston, iron
+                # 2. Check Inventory (base, quote already extracted above)
                 
                 # Account for Locked Funds in Open Orders
                 # If we have an open order, the funds are removed from "Available Balance".
@@ -402,67 +449,57 @@ class MarketMaker:
                         pass
 
                 # Check Inventory using Shared Capital
-                # If capital_tracker is provided (Batch mode), use it. otherwise use global wallets
+                # If capital_tracker is provided (Batch mode), use it. Otherwise use global wallets
                 cap_source = capital_tracker if capital_tracker is not None else self.wallets
                 
-                # Add locked funds back to "Available" to determine true capacity
-                # Note: For Iron (Shared), this is tricky. If we add locked_quote, we might double count if tracker doesn't know about locks?
-                # Actually, capital_tracker is initialized from wallets (Available).
-                # So adding locked_quote locally for THIS market's check is correct.
-                
-                quote_balance = cap_source.get(quote.lower(), 0) + locked_quote
+                # Base asset balance (not shared, no lock needed)
                 base_balance = self.wallets.get(base.lower(), 0) + locked_base
+                
+                # Quote (Iron) balance - needs atomic read+write for thread safety
+                # We'll do the full allocation check under lock for Iron
+                quote_balance = 0.0
+                if quote == "iron" and capital_tracker is not None:
+                    # Will be checked atomically below
+                    async with self.capital_lock:
+                        quote_balance = capital_tracker.get(quote.lower(), 0) + locked_quote
+                else:
+                    quote_balance = cap_source.get(quote.lower(), 0) + locked_quote
                 
                 # Target Value Liquidity Strategy (using config value)
                 check_price = buy_price if buy_price > 0 else (sell_price if sell_price > 0 else 0)
                 
                 # DYNAMIC SIZING BASED ON CAPITAL
-                # Allocate min(TARGET, AVAILABLE)
-                # If we have 1.65, we use 1.65.
-                # If we have 100, we use 20.
-                
                 allocated_value = TARGET_VALUE
                 if quote == "iron" and quote_balance < TARGET_VALUE:
                      allocated_value = quote_balance
                 
                 # Min Notional Check (0.05 buffer)
                 if allocated_value < 0.05:
-                    # If we have less than 0.05, we effectively can't buy.
                     allocated_value = 0
                 
                 if check_price > 0 and allocated_value > 0:
                     required_qty = allocated_value / check_price
                 else:
-                    required_qty = 0 # Cannot buy
+                    required_qty = 0
                     
                 # Cap at max quantity from config
-                if required_qty > MAX_QUANTITY: required_qty = MAX_QUANTITY
+                if required_qty > MAX_QUANTITY: 
+                    required_qty = MAX_QUANTITY
     
-                # Recalculate strict buy requirement
                 required_qty = float(f"{required_qty:.2f}")
     
-                # Decrement Shared Capital if we are buying
-                # Note: This is not thread-safe perfectly without a lock, but good enough for soft limits.
-                # Actually, with asyncio, we are single-threaded on the event loop, so strict decrements WORK safely 
-                # as long as we don't await between read and write.
-                # BUT _process_market has awaits before this? No, only calc_fair_price.
-                # Wait, calc_fair_price IS awaited. So race condition exists.
-                # However, logic: read -> calc -> decrement.
-                # We should decrement immediately if we intend to buy?
-                # Or just accept best effort.
-                
                 should_buy = (quote_balance >= (buy_price * required_qty)) and (required_qty > 0)
                 
-                # Thread-safe Iron allocation using lock
+                # Atomic Iron allocation: read + decision + write under same lock
                 if should_buy and quote == "iron" and capital_tracker is not None:
                     async with self.capital_lock:
-                        # Re-check balance under lock to prevent race condition
-                        current_balance = capital_tracker.get(quote.lower(), 0)
+                        # Re-check balance under lock (another coroutine may have consumed it)
+                        current_balance = capital_tracker.get(quote.lower(), 0) + locked_quote
                         cost = buy_price * required_qty
                         if current_balance >= cost:
-                            capital_tracker[quote.lower()] = max(0, current_balance - cost)
+                            # Decrement the tracker (not including locked_quote in decrement)
+                            capital_tracker[quote.lower()] = max(0, capital_tracker.get(quote.lower(), 0) - cost)
                         else:
-                            # Not enough capital after re-check, skip buy
                             should_buy = False
                             logger.debug(f"{market}: Iron allocation race detected, skipping buy.")
                 
@@ -524,48 +561,61 @@ class MarketMaker:
     
                 # Execute Changes (Cancel Stale)
                 for oid in orders_to_cancel:
-                    logger.info(f"{market}: Cancelling order {oid} (Diff Mismatch).")
-                    try:
-                        await self._run_sync(self.client.cancel_order, order_id=oid)
+                    if config.trading.dry_run:
+                        logger.info(f"🧪 [DRY-RUN] {market}: Would cancel order {oid}")
                         self.metrics.record_order_cancelled()
-                    except Exception as e:
-                        # 1102 or 'Not Open' means it's already done.
-                        if "1102" in str(e) or "Not Open" in str(e):
-                            logger.debug(f"{market}: Order {oid} already closed (benign race).")
-                        else:
-                            logger.error(f"{market}: Failed to cancel {oid}: {e}")
+                    else:
+                        logger.info(f"{market}: Cancelling order {oid} (Diff Mismatch).")
+                        try:
+                            await self._run_sync(self.client.cancel_order, order_id=oid)
+                            self.metrics.record_order_cancelled()
+                        except Exception as e:
+                            # 1102 or 'Not Open' means it's already done.
+                            if "1102" in str(e) or "Not Open" in str(e):
+                                logger.debug(f"{market}: Order {oid} already closed (benign race).")
+                            else:
+                                logger.error(f"{market}: Failed to cancel {oid}: {e}")
     
                 # Execute Changes (Create New)
                 if should_buy and not buy_active and buy_price > 0:
-                     try:
-                         await self._run_sync(
-                            self.client.create_order,
-                            market=market, side="buy", type_="limit", 
-                            price=f"{buy_price:.2f}", quantity=f"{required_qty:.2f}"
-                         )
-                         logger.info(f"{market}: Placed Buy {buy_price:.2f} x {required_qty}")
-                         self.metrics.record_order_placed()
-                         self.metrics.record_spread(market, buy_price, sell_price)
-                     except Exception as e:
-                         if "3003" in str(e) or "Funds error" in str(e):
-                             logger.warning(f"{market}: Buy failed - Insufficient funds.")
-                         else:
-                             logger.error(f"{market}: Buy failed: {e}")
+                    if config.trading.dry_run:
+                        logger.info(f"🧪 [DRY-RUN] {market}: Would place Buy {buy_price:.2f} x {required_qty}")
+                        self.metrics.record_order_placed()
+                        self.metrics.record_spread(market, buy_price, sell_price)
+                    else:
+                        try:
+                            await self._run_sync(
+                                self.client.create_order,
+                                market=market, side="buy", type_="limit", 
+                                price=f"{buy_price:.2f}", quantity=f"{required_qty:.2f}"
+                            )
+                            logger.info(f"{market}: Placed Buy {buy_price:.2f} x {required_qty}")
+                            self.metrics.record_order_placed()
+                            self.metrics.record_spread(market, buy_price, sell_price)
+                        except Exception as e:
+                            if "3003" in str(e) or "Funds error" in str(e):
+                                logger.warning(f"{market}: Buy failed - Insufficient funds.")
+                            else:
+                                logger.error(f"{market}: Buy failed: {e}")
                 
                 if should_sell and not sell_active and sell_price > 0:
-                     try:
-                         await self._run_sync(
-                            self.client.create_order,
-                            market=market, side="sell", type_="limit", 
-                            price=f"{sell_price:.2f}", quantity=f"{sell_qty:.2f}"
-                         )
-                         logger.info(f"{market}: Placed Sell {sell_price:.2f} x {sell_qty}")
-                         self.metrics.record_order_placed()
-                     except Exception as e:
-                         if "3003" in str(e) or "Funds error" in str(e):
-                             logger.warning(f"{market}: Sell failed - Insufficient inventory/funds.")
-                         else:
-                             logger.error(f"{market}: Sell failed: {e}")
+                    if config.trading.dry_run:
+                        logger.info(f"🧪 [DRY-RUN] {market}: Would place Sell {sell_price:.2f} x {sell_qty}")
+                        self.metrics.record_order_placed()
+                    else:
+                        try:
+                            await self._run_sync(
+                                self.client.create_order,
+                                market=market, side="sell", type_="limit", 
+                                price=f"{sell_price:.2f}", quantity=f"{sell_qty:.2f}"
+                            )
+                            logger.info(f"{market}: Placed Sell {sell_price:.2f} x {sell_qty}")
+                            self.metrics.record_order_placed()
+                        except Exception as e:
+                            if "3003" in str(e) or "Funds error" in str(e):
+                                logger.warning(f"{market}: Sell failed - Insufficient inventory/funds.")
+                            else:
+                                logger.error(f"{market}: Sell failed: {e}")
     
             except Exception as e:
                 # Catch strict errors in earlier logic (calc price, wallet check)
@@ -634,9 +684,12 @@ class MarketMaker:
             self.market_locks = {m: asyncio.Lock() for m in self.markets}
             
             try:
-                # Global cleanup on start
-                logger.info("Cleaning up existing orders...")
-                await self._run_sync(self.client.cancel_orders) 
+                # Global cleanup on start (skip in dry-run mode)
+                if config.trading.dry_run:
+                    logger.warning("🧪 DRY-RUN MODE ENABLED - No real orders will be placed!")
+                else:
+                    logger.info("Cleaning up existing orders...")
+                    await self._run_sync(self.client.cancel_orders) 
                 
                 # Fetch initial wallets to verify auth and funds
                 await self._update_wallets()
@@ -647,9 +700,10 @@ class MarketMaker:
                      self.alerts.warning("Startup Delayed", "Failed to fetch wallets. Retrying...")
                      await asyncio.sleep(5)
                      continue
-                     
-                logger.info(f"Startup successful. Active on {len(self.markets)} markets.")
-                self.alerts.info("Bot Started", f"Market Maker active on {len(self.markets)} markets.")
+                
+                mode_str = " [DRY-RUN]" if config.trading.dry_run else ""
+                logger.info(f"Startup successful.{mode_str} Active on {len(self.markets)} markets.")
+                self.alerts.info("Bot Started", f"Market Maker active on {len(self.markets)} markets.{mode_str}")
                 break # Exit startup loop
                 
             except CircuitBreakerOpen as e:
@@ -684,6 +738,15 @@ class MarketMaker:
         except Exception as e:
             logger.error(f"Failed to start WebSocket: {e}")
             ws_task = None
+
+        # 3. Health Endpoint Setup
+        health_server = None
+        if config.health.enabled:
+            try:
+                health_server = HealthServer(self, port=config.health.port)
+                await health_server.start()
+            except Exception as e:
+                logger.warning(f"Health endpoint failed to start: {e}")
 
         try:
             # Seed orders once

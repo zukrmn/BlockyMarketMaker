@@ -4,7 +4,7 @@ Supports YAML config file with environment variable overrides.
 """
 import os
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,9 @@ class APIConfig:
 
 @dataclass 
 class TradingConfig:
+    dry_run: bool = False  # If True, log orders but don't execute
+    enabled_markets: List[str] = field(default_factory=list)  # Whitelist (empty = all)
+    disabled_markets: List[str] = field(default_factory=list)  # Blacklist (overrides enabled)
     spread: float = 0.05
     min_spread_ticks: float = 0.01
     target_value: float = 10.0
@@ -86,6 +89,25 @@ class PriceModelConfig:
 
 
 @dataclass
+class DynamicSpreadConfig:
+    """Configuration for dynamic spread calculation."""
+    enabled: bool = True
+    base_spread: float = 0.03           # 3% base spread
+    volatility_multiplier: float = 2.0  # How much volatility affects spread
+    inventory_impact: float = 0.02      # Max adjustment from inventory imbalance
+    min_spread: float = 0.01            # 1% minimum spread
+    max_spread: float = 0.15            # 15% maximum spread
+    volatility_window: int = 24         # Hours of OHLCV data
+
+
+@dataclass
+class HealthConfig:
+    """Configuration for health endpoint."""
+    enabled: bool = True
+    port: int = 8080
+
+
+@dataclass
 class Config:
     """Main configuration container."""
     api: APIConfig = field(default_factory=APIConfig)
@@ -96,6 +118,8 @@ class Config:
     alerts: AlertsConfig = field(default_factory=AlertsConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     price_model: PriceModelConfig = field(default_factory=PriceModelConfig)
+    dynamic_spread: DynamicSpreadConfig = field(default_factory=DynamicSpreadConfig)
+    health: HealthConfig = field(default_factory=HealthConfig)
 
 
 def _deep_update(base: dict, updates: dict) -> dict:
@@ -173,6 +197,16 @@ def load_config(config_path: str = "config.yaml") -> Config:
                     config.price_model.cache_ttl = yaml_config['price_model']['cache_ttl']
                 if 'base_prices' in yaml_config['price_model']:
                     config.price_model.base_prices.update(yaml_config['price_model']['base_prices'])
+            
+            if 'dynamic_spread' in yaml_config:
+                for key, value in yaml_config['dynamic_spread'].items():
+                    if hasattr(config.dynamic_spread, key):
+                        setattr(config.dynamic_spread, key, value)
+            
+            if 'health' in yaml_config:
+                for key, value in yaml_config['health'].items():
+                    if hasattr(config.health, key):
+                        setattr(config.health, key, value)
             
             logger.info(f"📄 Loaded configuration from {config_path}")
             
