@@ -9,6 +9,10 @@ api:
 
 # Trading Parameters
 trading:
+  dry_run: false                  # Set true to simulate without real orders
+  enabled_markets: []             # Whitelist: empty = all markets, otherwise only these
+  disabled_markets: []            # Blacklist: never trade these (overrides enabled)
+  # Example: disabled_markets: [sand_iron, dirt_iron]
   spread: 0.05                    # 5% spread (0.05 = 5%)
   min_spread_ticks: 0.01          # Minimum spread in price units
   target_value: 10.0              # Target order value in Iron
@@ -72,3 +76,9 @@ dynamic_spread:
   min_spread: 0.01                  # 1% minimum spread
   max_spread: 0.15                  # 15% maximum spread
   volatility_window: 24             # Hours of OHLCV data to consider
+
+# Health Endpoint
+# Exposes /health for external monitoring (uptime robots, Kubernetes, etc.)
+health:
+  enabled: true                     # Set to false to disable health endpoint
+  port: 8080                        # Port for health HTTP server

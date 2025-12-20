@@ -4,7 +4,7 @@ Supports YAML config file with environment variable overrides.
 """
 import os
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,9 @@ class APIConfig:
 
 @dataclass 
 class TradingConfig:
+    dry_run: bool = False  # If True, log orders but don't execute
+    enabled_markets: List[str] = field(default_factory=list)  # Whitelist (empty = all)
+    disabled_markets: List[str] = field(default_factory=list)  # Blacklist (overrides enabled)
     spread: float = 0.05
     min_spread_ticks: float = 0.01
     target_value: float = 10.0
@@ -98,6 +101,13 @@ class DynamicSpreadConfig:
 
 
 @dataclass
+class HealthConfig:
+    """Configuration for health endpoint."""
+    enabled: bool = True
+    port: int = 8080
+
+
+@dataclass
 class Config:
     """Main configuration container."""
     api: APIConfig = field(default_factory=APIConfig)
@@ -109,6 +119,7 @@ class Config:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     price_model: PriceModelConfig = field(default_factory=PriceModelConfig)
     dynamic_spread: DynamicSpreadConfig = field(default_factory=DynamicSpreadConfig)
+    health: HealthConfig = field(default_factory=HealthConfig)
 
 
 def _deep_update(base: dict, updates: dict) -> dict:
@@ -191,6 +202,11 @@ def load_config(config_path: str = "config.yaml") -> Config:
                 for key, value in yaml_config['dynamic_spread'].items():
                     if hasattr(config.dynamic_spread, key):
                         setattr(config.dynamic_spread, key, value)
+            
+            if 'health' in yaml_config:
+                for key, value in yaml_config['health'].items():
+                    if hasattr(config.health, key):
+                        setattr(config.health, key, value)
             
             logger.info(f"📄 Loaded configuration from {config_path}")
             
