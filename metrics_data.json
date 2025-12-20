@@ -1,0 +1,3536 @@
+{
+  "start_time": 1766255844.5890508,
+  "inventory": {
+    "cobl": 573.0,
+    "coal": 17.175,
+    "olog": -3.17391304,
+    "sand": -37.61,
+    "dirt": -200.0,
+    "diam": 0.8400000000000001
+  },
+  "cost_basis": {
+    "cobl": 22.92,
+    "coal": 6.870000000000002,
+    "olog": 0.0,
+    "sand": 0.6796,
+    "dirt": 0.0,
+    "diam": 39.9672
+  },
+  "trades": [
+    {
+      "timestamp": 1766259284.18894,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.18914,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1893868,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1894503,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1895304,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1895914,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1896498,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1897082,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.189765,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1898232,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1898804,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.189938,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1899943,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1900504,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1901035,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.190153,
+      "market": "olog_iron",
+      "side": "sell",
+      "price": 0.46,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1902046,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.190253,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1906612,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.190725,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1907787,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.19083,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1908805,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1909285,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1909766,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1910245,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1910725,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1911204,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1911688,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1912165,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1912642,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.191321,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1913693,
+      "market": "sand_iron",
+      "side": "sell",
+      "price": 0.06,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1914215,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1914656,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1915116,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.191556,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.191602,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 1.0
+    },
+    {
+      "timestamp": 1766259284.1916466,
+      "market": "coal_iron",
+      "side": "buy",
+      "price": 0.4,
+      "quantity": 0.175
+    },
+    {
+      "timestamp": 1766259284.1916926,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 500.0
+    },
+    {
+      "timestamp": 1766259284.1917374,
+      "market": "cobl_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 54.0
+    },
+    {
+      "timestamp": 1766259284.1917837,
+      "market": "dirt_iron",
+      "side": "sell",
+      "price": 0.01,
+      "quantity": 200.0
+    },
+    {
+      "timestamp": 1766259284.1918309,
+      "market": "olog_iron",
+      "side": "sell",
+      "price": 0.46,
+      "quantity": 2.17391304
+    },
+    {
+      "timestamp": 1766259284.1918764,
+      "market": "sand_iron",
+      "side": "buy",
+      "price": 0.04,
+      "quantity": 16.99
+    },
+    {
+      "timestamp": 1766259284.19192,
+      "market": "sand_iron",
+      "side": "sell",
+      "price": 0.05,
+      "quantity": 53.6
+    },
+    {
+      "timestamp": 1766259284.1919665,
+      "market": "diam_iron",
+      "side": "buy",
+      "price": 47.58,
+      "quantity": 0.2
+    },
+    {
+      "timestamp": 1766259284.1920125,
+      "market": "diam_iron",
+      "side": "buy",
+      "price": 47.58,
+      "quantity": 0.2
+    },
+    {
+      "timestamp": 1766259284.1920578,
+      "market": "diam_iron",
+      "side": "buy",
+      "price": 47.58,
+      "quantity": 0.2
+    },
+    {
+      "timestamp": 1766259284.192102,
+      "market": "diam_iron",
+      "side": "buy",
+      "price": 47.58,
+      "quantity": 0.2
+    },
+    {
+      "timestamp": 1766259284.1921473,
+      "market": "diam_iron",
+      "side": "buy",
+      "price": 47.58,
+      "quantity": 0.04
+    }
+  ],
+  "market_stats": {
+    "ston_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.6640036,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766255961.3701694,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766256560.1496718,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766256817.0363925,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766256880.3075862,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766256941.7467017,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766257609.731455,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766257887.1746612,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766258182.2052135,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766258319.0976787,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766258503.5414412,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        },
+        {
+          "timestamp": 1766258947.1719642,
+          "buy": 9.75,
+          "sell": 10.25,
+          "spread_pct": 5.128205128205128
+        },
+        {
+          "timestamp": 1766259052.8477466,
+          "buy": 9.75,
+          "sell": 10.25,
+          "spread_pct": 5.128205128205128
+        },
+        {
+          "timestamp": 1766259123.9327798,
+          "buy": 9.75,
+          "sell": 10.25,
+          "spread_pct": 5.128205128205128
+        },
+        {
+          "timestamp": 1766259283.1056268,
+          "buy": 0.09,
+          "sell": 0.1,
+          "spread_pct": 11.111111111111121
+        }
+      ]
+    },
+    "olog_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 3.17391304,
+      "buy_value": 0.0,
+      "sell_value": 1.4599999984,
+      "trade_count": 2,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.676582,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766255961.7706707,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766256130.314095,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766256560.4509115,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766256817.3047829,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766257610.0571134,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766257887.6909673,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766258182.4517958,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766258319.0402765,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766258503.5126033,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        },
+        {
+          "timestamp": 1766258947.1725574,
+          "buy": 9.75,
+          "sell": 10.25,
+          "spread_pct": 5.128205128205128
+        },
+        {
+          "timestamp": 1766259052.8483512,
+          "buy": 9.75,
+          "sell": 10.25,
+          "spread_pct": 5.128205128205128
+        },
+        {
+          "timestamp": 1766259123.9334006,
+          "buy": 9.75,
+          "sell": 10.25,
+          "spread_pct": 5.128205128205128
+        },
+        {
+          "timestamp": 1766259283.1177683,
+          "buy": 0.44,
+          "sell": 0.46,
+          "spread_pct": 4.545454545454549
+        }
+      ]
+    },
+    "cobl_iron": {
+      "buy_volume": 573.0,
+      "sell_volume": 0.0,
+      "buy_value": 22.92,
+      "sell_value": 0.0,
+      "trade_count": 21,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.6770532,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766255961.349947,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766256560.1928744,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766256816.982957,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766257609.736132,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766257887.193762,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766258182.1424825,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766258319.097542,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766258503.5354738,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766259283.1154323,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        }
+      ]
+    },
+    "sand_iron": {
+      "buy_volume": 16.99,
+      "sell_volume": 54.6,
+      "buy_value": 0.6796,
+      "sell_value": 2.74,
+      "trade_count": 3,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.6823075,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766255961.3698466,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766256560.1859858,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766256816.9986317,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766257003.2966099,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766257609.7472541,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766257887.1742516,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766258182.139739,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766258319.0461016,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766258503.5131469,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        },
+        {
+          "timestamp": 1766259283.1114066,
+          "buy": 0.04,
+          "sell": 0.05,
+          "spread_pct": 25.000000000000007
+        }
+      ]
+    },
+    "clay_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.6922357,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.3565924,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.197953,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256816.975833,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3429554,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8582196,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.322282,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8378985,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7954268,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.1744716,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2050827,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258258.4120352,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0972564,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5736568,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1032686,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "sugr_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7440877,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4027936,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.1834023,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256816.9762833,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.2989292,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.7539191,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3904197,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.805026,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.74761,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.1540928,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2055075,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0963702,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5740209,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.102642,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "coal_iron": {
+      "buy_volume": 17.175,
+      "sell_volume": 0.0,
+      "buy_value": 6.870000000000002,
+      "sell_value": 0.0,
+      "trade_count": 18,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.744389,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766255961.3654265,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766256306.1078157,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766256560.1486387,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766256816.9983687,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766257609.7366512,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766257887.207349,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766258182.1475918,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766258258.4289038,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766258319.0465636,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766258503.5407388,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        },
+        {
+          "timestamp": 1766259283.1156414,
+          "buy": 0.49,
+          "sell": 0.51,
+          "spread_pct": 4.081632653061228
+        }
+      ]
+    },
+    "wool_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7446594,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4025676,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.1527002,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.044613,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.296155,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7915683,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.207038,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.1406703,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258258.4285161,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0354578,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5352607,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1182601,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "whet_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7450979,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.3557599,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.1515672,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0440018,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8564851,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3183386,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.80455,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7894893,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.1691704,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.1473384,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258258.4110205,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0370624,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.541052,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1054573,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "lapi_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7453525,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766255847.1580024,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766255961.4357963,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766256560.1988313,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766256560.960241,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766256817.01853,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766256880.2577877,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766256941.7929277,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766257003.3201144,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766257064.836607,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766257609.7665741,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766257887.207202,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766258182.2046382,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766258319.0888333,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766258503.5743194,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        },
+        {
+          "timestamp": 1766259283.1771958,
+          "buy": 1.95,
+          "sell": 2.05,
+          "spread_pct": 5.1282051282051215
+        }
+      ]
+    },
+    "xtnt_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7460673,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255847.1449692,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4319336,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.198213,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.9547389,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0218732,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3053515,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8575087,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.2977407,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8645332,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7967484,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.2076764,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2049558,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0984783,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.573865,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.186541,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "aapl_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7462432,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255847.227483,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4317453,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.1991048,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.960139,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0362265,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3444173,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.7920759,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.4195142,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8158326,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7970831,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.2329943,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2033343,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0967755,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5744805,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1816654,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "beef_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7464895,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4359462,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.2364454,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0698252,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.2551937,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8234437,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3185642,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.7804775,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7971823,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.234249,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2044349,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.089079,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5949225,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1867523,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "gpow_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7467508,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4312887,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.1989515,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0359073,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.2675738,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.7948117,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.864408,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7470539,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.207516,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.232935,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0965128,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.574865,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.115218,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "slme_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7469907,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766255847.122371,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766255961.4320936,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256560.192025,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256560.9107652,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256817.0121317,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256880.2935708,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256941.7954483,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257003.3231437,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257064.8649423,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257609.7328985,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257610.3934393,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257887.2066927,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258182.205395,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258319.0968778,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258503.5951002,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766259283.1057804,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766259283.9917953,
+          "buy": 4.88,
+          "sell": 5.12,
+          "spread_pct": 4.9180327868852505
+        }
+      ]
+    },
+    "dand_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.747519,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.4371643,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.2438717,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.0719585,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256880.245283,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256941.818399,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.3869429,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257064.8376315,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257609.7969117,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.2340252,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.232731,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.2975624,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.5905764,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.1828208,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "bmus_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.796141,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.4363065,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.1980953,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.0449731,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256880.368343,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256941.82291,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.3898742,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257064.8380811,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257609.7818918,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.189364,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.204773,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.096648,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.5933197,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.1820061,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "popy_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.7965062,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.6402676,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.243209,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.0614376,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256880.712135,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256941.895967,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.38968,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257064.8855894,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257609.9849844,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.4312415,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.3552158,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.3337631,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.8042028,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.1764495,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "rmus_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8007329,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.7196097,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.242615,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.0588183,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256880.3420742,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256942.3951852,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.3879778,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257065.4590435,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257609.9993498,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.4191108,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.2601328,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.309615,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.8063328,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.1759315,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "flnt_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.801083,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4366333,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.2363477,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0725844,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.2920105,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8217907,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3864799,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8367708,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7956254,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.440582,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2536619,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.0864997,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.780009,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.3782449,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "grvl_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8015845,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.683998,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.2378933,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.0715826,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256881.1690767,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256942.4026427,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.4197152,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257064.9033318,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257610.0332394,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.4316235,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.259502,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.2928016,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.8066757,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.420854,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "fish_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8022087,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4386609,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.2360456,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0690775,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3427043,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8874712,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3871858,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8374999,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7974231,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.4357002,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.1834235,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.3093078,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258320.0567944,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5955443,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1796255,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "stng_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8056471,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4597323,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.243769,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0688944,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256881.1653101,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256942.3744748,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.4376206,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8927915,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257610.0215113,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.4310222,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2502203,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.2943227,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258504.125587,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.3752809,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "snow_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8095827,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.6433847,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.2427535,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.226197,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3522768,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8584461,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3909602,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8857648,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.985969,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.4149623,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2506719,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.3094072,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258320.0422328,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.5809047,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.4224875,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "fthr_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8103874,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.4384043,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.2436352,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.0275662,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3669026,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.894572,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3235323,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8646476,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.7879925,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.4408352,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.3582067,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.2926505,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.8072457,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.1843522,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "reds_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8112814,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.4595153,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.38863,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.201997,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256880.3526003,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256941.8975832,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.3862612,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257064.903155,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257609.9984858,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.472283,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.3455293,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.3885336,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258504.1342525,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.3784313,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "bone_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.8154428,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.7020276,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.3868358,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.2145503,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3675032,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256941.8579369,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.4316232,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8920152,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257609.998861,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.4826727,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.2541356,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.3572814,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.8069284,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.4193025,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "obsn_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.9164877,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766255961.7192652,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256560.2894459,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256817.2765162,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256880.7224655,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766256942.3986642,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257003.391224,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257064.8921962,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257610.0303679,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766257887.44104,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258182.2599373,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258183.0643234,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258319.5856686,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766258503.8183184,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        },
+        {
+          "timestamp": 1766259283.4191968,
+          "buy": 2.44,
+          "sell": 2.56,
+          "spread_pct": 4.9180327868852505
+        }
+      ]
+    },
+    "arrw_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.9321282,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766255961.72194,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256560.2906253,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256817.2486827,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256880.3672018,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766256942.7093964,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257003.3876572,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257064.8918028,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257610.0276365,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766257887.4754016,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258182.4256744,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258319.3553817,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258504.1336775,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.3776257,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "blog_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.9517386,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.8064518,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.3683,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.2769897,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257610.3043847,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.4837182,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.4005928,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.5934422,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258504.1335397,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.4228165,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "cact_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.9521713,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.651543,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.3751578,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.2494962,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256880.350622,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256941.8969636,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.4251115,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257064.8923607,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257609.9990299,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.4759529,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.250531,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.331367,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.7753406,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.4194136,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "diam_iron": {
+      "buy_volume": 0.8400000000000001,
+      "sell_volume": 0.0,
+      "buy_value": 39.9672,
+      "sell_value": 0.0,
+      "trade_count": 5,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255846.956873,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766256560.3784337,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766256817.2760427,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766257610.0544093,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766257887.482061,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766258182.4082327,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766258319.5927336,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766258503.8334239,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        },
+        {
+          "timestamp": 1766259283.4137735,
+          "buy": 48.81,
+          "sell": 51.31,
+          "spread_pct": 5.121901249743905
+        }
+      ]
+    },
+    "gold_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255847.01702,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766255961.8030162,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766256560.163429,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766256817.275594,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766257609.7362602,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766257887.206847,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766258182.147918,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766258258.4280262,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766258319.3876975,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766258503.8336937,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        },
+        {
+          "timestamp": 1766259283.4221866,
+          "buy": 4.88,
+          "sell": 5.13,
+          "spread_pct": 5.122950819672131
+        }
+      ]
+    },
+    "slog_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766255847.0185525,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766255961.3467834,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256560.3881032,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256816.9811957,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766256817.6464367,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257003.297016,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257610.2951458,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766257887.6911786,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258182.3989413,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258319.592863,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258504.1340606,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.6556108,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "eggs_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766258319.3889081,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766258503.820815,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        },
+        {
+          "timestamp": 1766259283.6658218,
+          "buy": 0.97,
+          "sell": 1.02,
+          "spread_pct": 5.154639175257737
+        }
+      ]
+    },
+    "pump_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 0.0,
+      "buy_value": 0.0,
+      "sell_value": 0.0,
+      "trade_count": 0,
+      "spreads_captured": [
+        {
+          "timestamp": 1766258319.587554,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766258503.8333066,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        },
+        {
+          "timestamp": 1766259283.1862848,
+          "buy": 0.98,
+          "sell": 1.03,
+          "spread_pct": 5.102040816326536
+        }
+      ]
+    },
+    "dirt_iron": {
+      "buy_volume": 0.0,
+      "sell_volume": 200.0,
+      "buy_value": 0.0,
+      "sell_value": 2.0,
+      "trade_count": 1,
+      "spreads_captured": []
+    }
+  },
+  "total_iron_spent": 70.4368,
+  "total_iron_received": 6.1999999984,
+  "orders_placed": 720,
+  "orders_cancelled": 108,
+  "last_saved": 1766259307.4022312
+}

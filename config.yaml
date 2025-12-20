@@ -1,0 +1,63 @@
+# Market Maker Bot Configuration
+# ===============================
+# Edit this file to customize settings. Environment variables override these values.
+
+# API Configuration
+api:
+  endpoint: "https://craft.blocky.com.br/api/v1"
+  # API key should be set via BLOCKY_API_KEY environment variable for security
+
+# Trading Parameters
+trading:
+  spread: 0.05                    # 5% spread (0.05 = 5%)
+  min_spread_ticks: 0.01          # Minimum spread in price units
+  target_value: 10.0              # Target order value in Iron
+  max_quantity: 6400              # Maximum order quantity
+  refresh_interval: 60            # Seconds between integrity checks
+
+# Rate Limiting
+rate_limit:
+  max_requests: 30                # Requests per window
+  window_seconds: 1.0             # Window duration in seconds
+
+# Circuit Breaker
+circuit_breaker:
+  failure_threshold: 5            # Failures before opening circuit
+  recovery_timeout: 30.0          # Seconds before trying recovery
+  half_open_max_calls: 3          # Max calls in half-open state
+
+# Metrics
+metrics:
+  persistence_path: "metrics_data.json"
+  auto_save_interval: 60          # Seconds between auto-saves
+
+# Alerts
+# Set ALERT_WEBHOOK_URL environment variable to enable
+alerts:
+  enabled: true
+  webhook_type: "discord"         # discord, slack, telegram, custom
+  min_level: "warning"            # info, warning, error, critical
+  rate_limit_seconds: 60          # Minimum seconds between same alerts
+
+# Logging
+logging:
+  level: "INFO"                   # DEBUG, INFO, WARNING, ERROR
+  colored_output: true
+
+# Price Model
+price_model:
+  cache_ttl: 60                   # Seconds to cache supply metrics
+  
+  # Base prices (Iron) for known commodities
+  base_prices:
+    diam_iron: 50.0
+    gold_iron: 5.0
+    lapi_iron: 2.0
+    coal_iron: 0.5
+    ston_iron: 0.1
+    cobl_iron: 0.05
+    dirt_iron: 0.01
+    sand_iron: 0.05
+    olog_iron: 0.45
+    obsn_iron: 2.5
+    slme_iron: 5.0
