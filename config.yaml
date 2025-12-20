@@ -61,3 +61,14 @@ price_model:
     olog_iron: 0.45
     obsn_iron: 2.5
     slme_iron: 5.0
+
+# Dynamic Spread Calculation
+# Spread is calculated as: base_spread + volatility_adj + inventory_adj
+dynamic_spread:
+  enabled: true                     # Set to false to use fixed spread from trading.spread
+  base_spread: 0.03                 # 3% base spread
+  volatility_multiplier: 2.0        # Higher = more sensitive to volatility
+  inventory_impact: 0.02            # Max spread adjustment from inventory imbalance
+  min_spread: 0.01                  # 1% minimum spread
+  max_spread: 0.15                  # 15% maximum spread
+  volatility_window: 24             # Hours of OHLCV data to consider

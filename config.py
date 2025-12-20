@@ -86,6 +86,18 @@ class PriceModelConfig:
 
 
 @dataclass
+class DynamicSpreadConfig:
+    """Configuration for dynamic spread calculation."""
+    enabled: bool = True
+    base_spread: float = 0.03           # 3% base spread
+    volatility_multiplier: float = 2.0  # How much volatility affects spread
+    inventory_impact: float = 0.02      # Max adjustment from inventory imbalance
+    min_spread: float = 0.01            # 1% minimum spread
+    max_spread: float = 0.15            # 15% maximum spread
+    volatility_window: int = 24         # Hours of OHLCV data
+
+
+@dataclass
 class Config:
     """Main configuration container."""
     api: APIConfig = field(default_factory=APIConfig)
@@ -96,6 +108,7 @@ class Config:
     alerts: AlertsConfig = field(default_factory=AlertsConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     price_model: PriceModelConfig = field(default_factory=PriceModelConfig)
+    dynamic_spread: DynamicSpreadConfig = field(default_factory=DynamicSpreadConfig)
 
 
 def _deep_update(base: dict, updates: dict) -> dict:
@@ -173,6 +186,11 @@ def load_config(config_path: str = "config.yaml") -> Config:
                     config.price_model.cache_ttl = yaml_config['price_model']['cache_ttl']
                 if 'base_prices' in yaml_config['price_model']:
                     config.price_model.base_prices.update(yaml_config['price_model']['base_prices'])
+            
+            if 'dynamic_spread' in yaml_config:
+                for key, value in yaml_config['dynamic_spread'].items():
+                    if hasattr(config.dynamic_spread, key):
+                        setattr(config.dynamic_spread, key, value)
             
             logger.info(f"📄 Loaded configuration from {config_path}")
             

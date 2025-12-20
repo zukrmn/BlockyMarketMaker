@@ -6,6 +6,7 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from blocky import Blocky, BlockyWebSocket, CircuitBreakerOpen
 from price_model import PriceModel
+from spread_calculator import SpreadCalculator, SpreadConfig
 from metrics import MetricsTracker
 from alerts import AlertManager, AlertLevel
 from config import get_config
@@ -45,11 +46,11 @@ API_KEY = config.api.api_key
 if not API_KEY:
     raise RuntimeError("BLOCKY_API_KEY environment variable is not set. Please set it before running the bot.")
 API_ENDPOINT = config.api.endpoint
-SPREAD = config.trading.spread
 TARGET_VALUE = config.trading.target_value
 MAX_QUANTITY = config.trading.max_quantity
 REFRESH_INTERVAL = config.trading.refresh_interval
 MIN_SPREAD_TICKS = config.trading.min_spread_ticks
+FALLBACK_SPREAD = config.trading.spread  # Used when dynamic spread is disabled
 
 class MarketMaker:
     def __init__(self, api_key: str, endpoint: str):
@@ -84,6 +85,21 @@ class MarketMaker:
         
         # Trade tracking for metrics
         self.last_trade_cursor = None  # Track last processed trade ID
+        
+        # Dynamic Spread Calculator
+        spread_config = SpreadConfig(
+            enabled=config.dynamic_spread.enabled,
+            base_spread=config.dynamic_spread.base_spread,
+            volatility_multiplier=config.dynamic_spread.volatility_multiplier,
+            inventory_impact=config.dynamic_spread.inventory_impact,
+            min_spread=config.dynamic_spread.min_spread,
+            max_spread=config.dynamic_spread.max_spread,
+            volatility_window=config.dynamic_spread.volatility_window
+        )
+        self.spread_calculator = SpreadCalculator(self.client, spread_config)
+        
+        if spread_config.enabled:
+            logger.info("📊 Dynamic spread calculation enabled")
 
     async def _on_event_update(self, data: dict):
         """Callback for real-time events (Trade or Orderbook)."""
@@ -312,9 +328,23 @@ class MarketMaker:
                 if mid_price == 0:
                     return
     
-                # Standard Spread
-                buy_price = round(mid_price * (1 - SPREAD / 2), 2)
-                sell_price = round(mid_price * (1 + SPREAD / 2), 2)
+                # Calculate Dynamic Spread
+                base, quote = market.split('_')  # e.g. ston, iron
+                base_inventory = self.wallets.get(base.lower(), 0)
+                
+                # Get asymmetric spreads based on volatility + inventory
+                buy_spread, sell_spread = self.spread_calculator.get_dynamic_spread(
+                    market, 
+                    inventory=base_inventory,
+                    ticker=ticker
+                )
+                
+                # Calculate prices using dynamic spreads
+                buy_price = round(mid_price * (1 - buy_spread / 2), 2)
+                sell_price = round(mid_price * (1 + sell_spread / 2), 2)
+                
+                # Log dynamic spread for first few markets (debug)
+                logger.debug(f"{market}: Dynamic spread buy={buy_spread:.2%} sell={sell_spread:.2%}")
 
                 # COMPETITIVE STRATEGY (Pennying)
                 # Beat best bid/ask by 0.01 if it leaves us with > 1% profit margin from Mid Price
@@ -380,8 +410,7 @@ class MarketMaker:
                      buy_price = round(buy_price, 2)
                      sell_price = round(sell_price, 2)
     
-                # 2. Check Inventory
-                base, quote = market.split('_') # e.g. ston, iron
+                # 2. Check Inventory (base, quote already extracted above)
                 
                 # Account for Locked Funds in Open Orders
                 # If we have an open order, the funds are removed from "Available Balance".
