@@ -1,0 +1,23 @@
+# Blocky Market Maker Bot - Dependencies
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# YAML configuration
+PyYAML>=6.0
+
+# HTTP requests (for alerts and API)
+requests>=2.31.0
+
+# WebSocket support
+websockets>=12.0
+
+# Async HTTP client
+aiohttp>=3.9.0
+
+# Configuration validation
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Prometheus metrics
+prometheus-client>=0.19.0

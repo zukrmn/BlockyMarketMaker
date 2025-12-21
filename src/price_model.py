@@ -1,9 +1,12 @@
 import requests
 import logging
+import time
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 
 class PriceModel:
+    """Price model based on world scarcity for Minecraft items."""
     # World Boundaries
     X1, X2 = -5176, 5176
     Z1, Z2 = -2488, 2488
@@ -71,7 +74,7 @@ class PriceModel:
         "slme_iron": 5.0,
     }
 
-    def __init__(self, client, base_prices: dict = None):
+    def __init__(self, client: Any, base_prices: Optional[Dict[str, float]] = None) -> None:
         """
         Initialize PriceModel.
         
@@ -126,7 +129,8 @@ class PriceModel:
         total_blocks_area = width * depth
         return int(total_blocks_area / 256)
 
-    def get_circulating_supply(self) -> dict:
+    async def get_circulating_supply(self) -> Dict[str, int]:
+        """Fetches and caches circulating supply metrics from API."""
         import time
         current_time = time.time()
         
@@ -143,16 +147,30 @@ class PriceModel:
             self._using_stale_cache = False
             
         try:
-            # Use shared client optimized connection pool
-            data = self.client.get_supply_metrics(time_range="24h", interval="1h")
+            # Use shared client optimized connection pool (Async)
+            data = await self.client.get_supply_metrics()
             
-            if not data or not isinstance(data, list):
+            # Accept empty dict as valid "no data" (API 404 handled in client)
+            if data is None: 
+                # Only treat None as connection failure
                 self._consecutive_failures += 1
-                if self._consecutive_failures >= 3:
+                if self._consecutive_failures >= 3 and self._consecutive_failures % 50 == 0:
+                    logger.warning(f"⚠️ Metrics API returned None {self._consecutive_failures} times. Using cached/default supplies.")
+                return self._metrics_cache or {}
+            
+            # Handle empty dict (404 response from client)
+            if isinstance(data, dict) and not data:
+                self._consecutive_failures = 0
+                return self._metrics_cache or {}
+            
+            # Validate we have a non-empty list
+            if not isinstance(data, list) or len(data) == 0:
+                self._consecutive_failures += 1
+                if self._consecutive_failures >= 3 and self._consecutive_failures % 50 == 0:
                     logger.error(f"🚨 Metrics API returned invalid data {self._consecutive_failures} times consecutively!")
                 return self._metrics_cache or {}
 
-            # Get latest data point
+            # Get latest data point from list
             latest = data[-1]
             
             supplies = {}
@@ -172,9 +190,9 @@ class PriceModel:
             return supplies
         except Exception as e:
             self._consecutive_failures += 1
-            if self._consecutive_failures >= 3:
+            if self._consecutive_failures >= 3 and self._consecutive_failures % 50 == 0:
                 logger.error(f"🚨 Metrics API failing consistently: {e} (failure #{self._consecutive_failures})")
-            else:
+            elif self._consecutive_failures < 3:
                 logger.warning(f"Error fetching metrics: {e}")
             return self._metrics_cache or {} # Return stale cache if available
     
@@ -182,8 +200,9 @@ class PriceModel:
         """Returns True if metrics data is fresh and reliable."""
         return not self._using_stale_cache and self._consecutive_failures < 3
 
-    def calculate_fair_price(self, market: str) -> float:
-        supplies = self.get_circulating_supply()
+    async def calculate_fair_price(self, market: str) -> float:
+        """Calculate fair price based on scarcity model."""
+        supplies = await self.get_circulating_supply()
         circulating = supplies.get(market, 0)
         total_possible = self.world_supply.get(market, 1)
         

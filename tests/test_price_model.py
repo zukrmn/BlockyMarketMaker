@@ -3,7 +3,12 @@ Unit tests for the PriceModel class.
 Tests fair price calculation logic and supply estimation.
 """
 import unittest
+import os
+import sys
 from unittest.mock import MagicMock, patch
+
+# Add src directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
 
 class TestPriceModel(unittest.TestCase):

@@ -15,7 +15,7 @@ trading:
   # Example: disabled_markets: [sand_iron, dirt_iron]
   spread: 0.05                    # 5% spread (0.05 = 5%)
   min_spread_ticks: 0.01          # Minimum spread in price units
-  target_value: 10.0              # Target order value in Iron
+  target_value: 5.0              # Target order value in Iron
   max_quantity: 6400              # Maximum order quantity
   refresh_interval: 60            # Seconds between integrity checks
 

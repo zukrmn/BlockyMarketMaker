@@ -56,7 +56,7 @@ class SpreadCalculator:
         self._price_history: Dict[str, deque] = {}
         self._max_history = 100
         
-    def calculate_volatility(self, market: str) -> float:
+    async def calculate_volatility(self, market: str) -> float:
         """
         Calculate historical volatility for a market.
         
@@ -72,8 +72,8 @@ class SpreadCalculator:
                 return self._volatility_cache[market]
         
         try:
-            # Fetch OHLCV data (1 hour candles, last 24 hours)
-            response = self.client.get_ohlcv(market, timeframe="1H")
+            # Fetch OHLCV data (1 hour candles, last 24 hours) - Async
+            response = await self.client.get_ohlcv(market, timeframe="1H")
             
             if not response.get("success"):
                 logger.debug(f"{market}: Failed to fetch OHLCV for volatility")
@@ -209,7 +209,7 @@ class SpreadCalculator:
         spread = (ask - bid) / bid
         return spread
     
-    def get_dynamic_spread(
+    async def get_dynamic_spread(
         self,
         market: str,
         inventory: float = 0.0,
@@ -239,7 +239,7 @@ class SpreadCalculator:
         if use_cache:
             vol = self.get_quick_volatility(market)
         else:
-            vol = self.calculate_volatility(market)
+            vol = await self.calculate_volatility(market)
         
         vol_adj = vol * self.config.volatility_multiplier * 0.01  # Convert to spread %
         

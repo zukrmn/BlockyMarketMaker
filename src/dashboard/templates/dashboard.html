@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACMaker Dashboard</title>
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: #1e1e1e;
+        margin: 15% auto;
+        padding: 24px;
+        border: 1px solid #333;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        color: #e0e0e0;
+        animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .modal-title {
+        font-size: 1.5em;
+        margin-bottom: 16px;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .modal-text {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #ccc;
+    }
+</style>
+</head>
+
+<body>
+    <!-- Modal for Strategy Info -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modalTitle" class="modal-title">Título</div>
+            <div id="modalText" class="modal-text">Texto explicativo...</div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <img src="/img/icon-novo-branco.svg" alt="ACMaker">
+                    ACMaker Dashboard
+                </div>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    {{status}}
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat">
+                    <div class="stat-label">P&L Realizado</div>
+                    <div class="stat-value {{pnl_class}}">{{realized_pnl}}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Trades</div>
+                    <div class="stat-value">{{total_trades}}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Ordens</div>
+                    <div class="stat-value">{{orders_placed}}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Mercados</div>
+                    <div class="stat-value">{{market_count}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Market List -->
+        <div class="sidebar">
+            <div class="sidebar-header">Mercados Ativos</div>
+            <div class="search-box">
+                <input type="text" class="search-input" id="marketSearch"
+                    placeholder="Buscar mercado... (ex: STON/IRON)" oninput="filterMarkets()">
+            </div>
+            <div class="market-list" id="marketList">
+                {{ market_list | safe }}
+            </div>
+        </div>
+
+        <!-- Main Chart Area -->
+        <div class="main">
+            <div class="chart-header">
+                <div class="chart-title">{{ selected_market_display }}</div>
+                <div class="chart-actions" id="timeframeButtons">
+                    <button class="chart-btn" data-tf="1m">1m</button>
+                    <button class="chart-btn" data-tf="5m">5m</button>
+                    <button class="chart-btn" data-tf="15m">15m</button>
+                    <button class="chart-btn" data-tf="1H">1H</button>
+                    <button class="chart-btn active" data-tf="4H">4H</button>
+                    <button class="chart-btn" data-tf="1D">1D</button>
+                    <button class="chart-btn" data-tf="1W">1W</button>
+                </div>
+            </div>
+            <div class="chart-container" id="chartContainer">
+                <div id="chart"></div>
+                <canvas class="chart-canvas" id="drawCanvas"></canvas>
+                <div class="drawing-tools">
+                    <button class="draw-btn active" id="btnCursor" title="Cursor - Mover Gráfico (V)"
+                        onclick="setDrawTool('cursor')">↖</button>
+                    <button class="draw-btn" id="btnSelect" title="Selecionar Desenho (S)"
+                        onclick="setDrawTool('select')">⊙</button>
+                    <hr class="draw-separator">
+                    <button class="draw-btn" id="btnLine" title="Linha de Tendência (T)"
+                        onclick="setDrawTool('line')">╱</button>
+                    <button class="draw-btn" id="btnRay" title="Raio (R)" onclick="setDrawTool('ray')">↗</button>
+                    <button class="draw-btn" id="btnHline" title="Linha Horizontal (H)"
+                        onclick="setDrawTool('hline')">─</button>
+                    <button class="draw-btn" id="btnVline" title="Linha Vertical"
+                        onclick="setDrawTool('vline')">│</button>
+                    <hr class="draw-separator">
+                    <button class="draw-btn" id="btnFib" title="Fibonacci Retracement (F)"
+                        onclick="setDrawTool('fib')">𝐹</button>
+                    <button class="draw-btn" id="btnRect" title="Retângulo (B)" onclick="setDrawTool('rect')">▢</button>
+                    <hr class="draw-separator">
+                    <button class="draw-btn" id="btnCross" title="Crosshair (C)"
+                        onclick="setDrawTool('cross')">+</button>
+                    <button class="draw-btn" id="btnClear" title="Limpar Tudo (Del)"
+                        onclick="clearDrawings()">🗑</button>
+                </div>
+            </div>
+
+            <!-- Strategy Panel -->
+            <div class="strategy-panel">
+                {{ strategy_cards | safe }}
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title">Order Book</div>
+                <div class="orderbook">
+                    {{ orderbook | safe }}
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title">Bot Orders</div>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-label">BUY Order</div>
+                        <div class="metric-value" style="color:var(--green)">{{buy_order}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">SELL Order</div>
+                        <div class="metric-value" style="color:var(--red)">{{sell_order}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Spread</div>
+                        <div class="metric-value">{{spread}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Posição</div>
+                        <div class="metric-value">{{position}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section" style="flex:1; overflow:hidden;">
+                <div class="panel-title">Trade Log</div>
+                <div class="trade-log">
+                    {{ trade_log | safe }}
+                </div>
+            </div>
+
+            <div class="footer">
+                <span>Última atualização: {{timestamp}}</span>
+                <span>Auto-refresh desativado</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/drawing.js"></script>
+    <script>
+        // Strategy Explanations
+        const strategyInfo = {
+            "scarcity": {
+                title: "Estratégia de Escassez",
+                text: "Ajusta o preço comprando e vendendo de acordo com o nível do estoque. Se o estoque está cheio, o preço cai para vender mais rápido. Se está vazio, o preço sobe para evitar ficar sem produtos."
+            },
+            "ticker": {
+                title: "Preço de Mercado (Ticker)",
+                text: "Representa o último preço negociado no mercado BlockyCRAFT real (sem influência do bot). É a referência de quanto outros jogadores estão pagando no momento."
+            },
+            "vwap": {
+                title: "Preço Médio Ponderado (VWAP)",
+                text: "O VWAP (Volume Weighted Average Price) calcula o preço médio considerando o volume das negociações. Dá uma noção melhor da tendência de preço real do que apenas o 'último trade'."
+            },
+            "composite": {
+                title: "Preço Composto (Final)",
+                text: "É o veredito final do robô. Esta estratégia combina todas as outras (Escassez, VWAP, Mercado) para decidir o 'Preço Justo' ideal para colocar as ordens de compra e venda agora."
+            }
+        };
+
+        function showStrategyInfo(strategy) {
+            const info = strategyInfo[strategy.toLowerCase()];
+            if (info) {
+                document.getElementById('modalTitle').innerText = info.title;
+                document.getElementById('modalText').innerText = info.text;
+                document.getElementById('infoModal').style.display = "block";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('infoModal').style.display = "none";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('infoModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Initialize TradingView-style chart
+        const chartContainer = document.getElementById('chartContainer');
+        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+            width: chartContainer.clientWidth,
+            height: chartContainer.clientHeight,
+            layout: {
+                background: { type: 'solid', color: '#000000' },
+                textColor: '#e0e0e0',
+            },
+            grid: {
+                vertLines: { color: '#111111' },
+                horzLines: { color: '#111111' },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            rightPriceScale: {
+                borderColor: '#111111',
+            },
+            timeScale: {
+                borderColor: '#111111',
+                timeVisible: true,
+            },
+        });
+
+        const candleSeries = chart.addCandlestickSeries({
+            upColor: '#00ff00',
+            downColor: '#ff0000',
+            borderUpColor: '#00ff00',
+            borderDownColor: '#ff0000',
+            wickUpColor: '#00ff00',
+            wickDownColor: '#ff0000',
+        });
+
+        // Load candle data
+        const candleData = {{ candle_data | safe }};
+        candleSeries.setData(candleData);
+
+        // Add strategy price lines
+        const strategies = {{ strategy_lines | safe }};
+        strategies.forEach(s => {
+            candleSeries.createPriceLine({
+                price: s.price,
+                color: s.color,
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: s.name,
+            });
+        });
+
+        // Add bid/ask lines
+        candleSeries.createPriceLine({
+            price: {{ bid_price }},
+            color: '#00ff00',
+            lineWidth: 2,
+            lineStyle: LightweightCharts.LineStyle.Solid,
+            axisLabelVisible: true,
+            title: 'BID',
+        });
+        candleSeries.createPriceLine({
+            price: {{ ask_price }},
+            color: '#ff0000',
+            lineWidth: 2,
+            lineStyle: LightweightCharts.LineStyle.Solid,
+            axisLabelVisible: true,
+            title: 'ASK',
+        });
+
+        // Resize handler
+        new ResizeObserver(() => {
+            chart.applyOptions({
+                width: chartContainer.clientWidth,
+                height: chartContainer.clientHeight
+            });
+        }).observe(chartContainer);
+
+        // Market search filter
+        function filterMarkets() {
+            const searchInput = document.getElementById('marketSearch');
+            const filter = searchInput.value.toUpperCase().replace('/', '_');
+            const marketList = document.getElementById('marketList');
+            const items = marketList.getElementsByClassName('market-item');
+
+            for (let i = 0; i < items.length; i++) {
+                const marketName = items[i].getAttribute('data-market') ||
+                    items[i].querySelector('.market-name').textContent;
+                if (marketName.toUpperCase().indexOf(filter) > -1) {
+                    items[i].classList.remove('hidden');
+                } else {
+                    items[i].classList.add('hidden');
+                }
+            }
+        }
+
+        window.filterMarkets = filterMarkets;
+
+        // Timeframe configurations (interval in seconds)
+        const timeframes = {
+            '1m': 60, '5m': 300, '15m': 900, '1H': 3600,
+            '4H': 14400, '1D': 86400, '1W': 604800
+        };
+        let currentTimeframe = '4H';
+
+        // Generate candles for different timeframes
+        function generateCandles(intervalSeconds, count = 50) {
+            const basePrice = candleData[candleData.length - 1]?.close || 50;
+            const now = Math.floor(Date.now() / 1000);
+            const newCandles = [];
+            let price = basePrice * 0.95;
+
+            for (let i = 0; i < count; i++) {
+                const time = now - (count - i) * intervalSeconds;
+                const volatility = intervalSeconds > 3600 ? 0.03 : 0.015;
+                const change = (Math.random() - 0.5) * 2 * volatility;
+                const open = price;
+                const close = price * (1 + change);
+                const high = Math.max(open, close) * (1 + Math.random() * 0.01);
+                const low = Math.min(open, close) * (1 - Math.random() * 0.01);
+                newCandles.push({
+                    time: time,
+                    open: parseFloat(open.toFixed(4)),
+                    high: parseFloat(high.toFixed(4)),
+                    low: parseFloat(low.toFixed(4)),
+                    close: parseFloat(close.toFixed(4))
+                });
+                price = close;
+            }
+            return newCandles;
+        }
+
+        // Timeframe button handlers
+        document.getElementById('timeframeButtons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('chart-btn')) {
+                const tf = e.target.dataset.tf;
+                if (tf === currentTimeframe) return;
+
+                document.querySelectorAll('#timeframeButtons .chart-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentTimeframe = tf;
+
+                // Generate new candles for this timeframe
+                const interval = timeframes[tf];
+                const newCandles = generateCandles(interval);
+                candleSeries.setData(newCandles);
+
+                console.log('Timeframe changed to:', tf);
+            }
+        });
+
+        // Initialize drawing tools
+        initDrawingTools('drawCanvas', 'chartContainer');
+    </script>
+</body>
+
+</html>
