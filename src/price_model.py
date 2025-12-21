@@ -1,9 +1,12 @@
 import requests
 import logging
+import time
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 
 class PriceModel:
+    """Price model based on world scarcity for Minecraft items."""
     # World Boundaries
     X1, X2 = -5176, 5176
     Z1, Z2 = -2488, 2488
@@ -71,7 +74,7 @@ class PriceModel:
         "slme_iron": 5.0,
     }
 
-    def __init__(self, client, base_prices: dict = None):
+    def __init__(self, client: Any, base_prices: Optional[Dict[str, float]] = None) -> None:
         """
         Initialize PriceModel.
         
@@ -126,7 +129,8 @@ class PriceModel:
         total_blocks_area = width * depth
         return int(total_blocks_area / 256)
 
-    def get_circulating_supply(self) -> dict:
+    def get_circulating_supply(self) -> Dict[str, int]:
+        """Fetches and caches circulating supply metrics from API."""
         import time
         current_time = time.time()
         
@@ -183,6 +187,7 @@ class PriceModel:
         return not self._using_stale_cache and self._consecutive_failures < 3
 
     def calculate_fair_price(self, market: str) -> float:
+        """Calculate fair price based on scarcity model."""
         supplies = self.get_circulating_supply()
         circulating = supplies.get(market, 0)
         total_possible = self.world_supply.get(market, 1)

@@ -2,7 +2,7 @@ import asyncio
 import os
 import time
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional, Any, Callable, Tuple
 from dotenv import load_dotenv
 
 # Internal imports (relative within src package)
@@ -13,6 +13,13 @@ from metrics import MetricsTracker
 from alerts import AlertManager, AlertLevel
 from config import get_config
 from health import HealthServer
+from trading_helpers import (
+    calculate_quotes,
+    apply_pennying,
+    calculate_locked_funds,
+    calculate_order_quantities,
+    diff_orders
+)
 
 
 # Load environment variables from .env file
@@ -57,7 +64,9 @@ MIN_SPREAD_TICKS = config.trading.min_spread_ticks
 FALLBACK_SPREAD = config.trading.spread  # Used when dynamic spread is disabled
 
 class MarketMaker:
-    def __init__(self, api_key: str, endpoint: str):
+    """Automated market maker bot for Blocky exchange."""
+    
+    def __init__(self, api_key: str, endpoint: str) -> None:
         self.client = Blocky(api_key=api_key, endpoint=endpoint)
         self.endpoint = endpoint
         self.price_model = PriceModel(
@@ -105,7 +114,7 @@ class MarketMaker:
         if spread_config.enabled:
             logger.info("📊 Dynamic spread calculation enabled")
 
-    async def _on_event_update(self, data: dict):
+    async def _on_event_update(self, data: Dict[str, Any]) -> None:
         """Callback for real-time events (Trade or Orderbook)."""
         try:
             # Data: {'channel': 'market:transactions', ...} OR {'channel': 'market:orderbook', ...}
@@ -148,7 +157,7 @@ class MarketMaker:
         except Exception as e:
             logger.error(f"WS Handler Error: {e}")
 
-    async def _run_sync(self, func, *args, **kwargs):
+    async def _run_sync(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Runs a synchronous function in a thread pool."""
         loop = asyncio.get_running_loop()
         from functools import partial
@@ -185,7 +194,7 @@ class MarketMaker:
             logger.error(f"Failed to fetch markets: {e}")
         return []
 
-    async def _update_wallets(self):
+    async def _update_wallets(self) -> None:
         """Fetches and updates wallet balances with 100ms throttling."""
         now = time.time()
         if now - self.last_wallet_update < 0.1:  # 100ms throttle (was 1s)
@@ -267,7 +276,7 @@ class MarketMaker:
             
         return open_orders
 
-    async def _poll_recent_trades(self):
+    async def _poll_recent_trades(self) -> None:
         """Polls recent trades from API and records them in metrics for P&L tracking."""
         try:
             # Fetch recent trades (limit 50, newest first)
@@ -320,7 +329,14 @@ class MarketMaker:
             logger.error(f"Error polling trades: {e}")
 
 
-    async def _process_market(self, market: str, supplies: dict, ticker: dict = None, open_orders: List[dict] = None, capital_tracker: dict = None):
+    async def _process_market(
+        self, 
+        market: str, 
+        supplies: Dict[str, int], 
+        ticker: Optional[Dict[str, Any]] = None, 
+        open_orders: Optional[List[Dict[str, Any]]] = None, 
+        capital_tracker: Optional[Dict[str, float]] = None
+    ) -> None:
         """Processes a single market: Calculates price, checks balance, updates orders."""
         lock = self.market_locks.get(market)
         if not lock: return
@@ -359,97 +375,21 @@ class MarketMaker:
                     inventory=base_inventory,
                     ticker=ticker
                 )
-                
-                # Calculate prices using dynamic spreads
-                buy_price = round(mid_price * (1 - buy_spread / 2), 2)
-                sell_price = round(mid_price * (1 + sell_spread / 2), 2)
+                # Calculate prices using dynamic spreads (using helper function)
+                buy_price, sell_price = calculate_quotes(mid_price, buy_spread, sell_spread)
                 
                 # Log dynamic spread for first few markets (debug)
                 logger.debug(f"{market}: Dynamic spread buy={buy_spread:.2%} sell={sell_spread:.2%}")
 
-                # COMPETITIVE STRATEGY (Pennying)
-                # Beat best bid/ask by 0.01 if it leaves us with > 1% profit margin from Mid Price
-                # Safe Limits:
-                MAX_BUY = mid_price * 0.99  # Ensure 1% margin from mid
-                MIN_SELL = mid_price * 1.01 # Ensure 1% margin from mid
-                
-                # Identify OUR current top orders to prevent self-pennying
-                my_best_bid = 0.0
-                my_best_ask = 0.0
-
-                if open_orders:
-                    for o in open_orders:
-                        p = float(o.get("price", 0))
-                        if o["side"] == "buy":
-                            if p > my_best_bid: my_best_bid = p
-                        elif o["side"] == "sell":
-                            if my_best_ask == 0 or p < my_best_ask: my_best_ask = p
-
-                if ticker:
-                    best_bid = float(ticker.get("bid", 0) or 0)
-                    best_ask = float(ticker.get("ask", 0) or 0)
-                    
-                    # Pennying Buy
-                    # Only penny if the competitor is NOT us.
-                    # If best_bid is approximately equal to our bid, assume it's us (or matched). 
-                    is_our_bid = abs(best_bid - my_best_bid) < 0.001
-
-                    if best_bid > buy_price and best_bid < MAX_BUY:
-                        if not is_our_bid:
-                            # Competitor: Beat them
-                            buy_price = best_bid + 0.01
-                        else:
-                            # Us: Maintain position (Snap target to current best to avoid cancel)
-                            buy_price = best_bid
-                    
-                    # Pennying Sell
-                    is_our_ask = abs(best_ask - my_best_ask) < 0.001 and my_best_ask > 0
-                    
-                    if best_ask > 0 and (best_ask < sell_price or sell_price == 0) and best_ask > MIN_SELL:
-                        if not is_our_ask:
-                            sell_price = best_ask - 0.01
-                        else:
-                            sell_price = best_ask
-
-                # Enforce minimum spread
-                if buy_price >= sell_price:
-                     # Logic: Try to widen by lowering Buy first.
-                     buy_price -= MIN_SPREAD_TICKS
-                     
-                     # If we are effectively equal/inverted still (e.g. they were 0.01, 0.01 -> buy 0.00, sell 0.01. diff 0.01. OK)
-                     # If they were 0.00, 0.00 -> buy -0.01.
-                     if buy_price < 0:
-                         buy_price = 0.00
-                     
-                     # Recalculate spread
-                     current_spread = sell_price - buy_price
-                     if current_spread < MIN_SPREAD_TICKS:
-                         # Must raise sell
-                         sell_price += (MIN_SPREAD_TICKS - current_spread)
-                     
-                     # Final sanity check: round to 2 decimals to avoid float artifacts
-                     buy_price = round(buy_price, 2)
-                     sell_price = round(sell_price, 2)
-    
+                # Apply pennying strategy using helper function
+                buy_price, sell_price = apply_pennying(
+                    buy_price, sell_price, mid_price, ticker, open_orders, MIN_SPREAD_TICKS
+                )
                 # 2. Check Inventory (base, quote already extracted above)
                 
-                # Account for Locked Funds in Open Orders
-                # If we have an open order, the funds are removed from "Available Balance".
-                # To decide if we SHOULD have an order, we need Total Equity (Available + Locked).
+                # Calculate locked funds using helper function
                 open_orders = open_orders or []
-                locked_base = 0.0
-                locked_quote = 0.0
-                
-                for o in open_orders:
-                    try:
-                        q = float(o.get("quantity", 0))
-                        p = float(o.get("price", 0))
-                        if o["side"] == "sell":
-                            locked_base += q
-                        elif o["side"] == "buy":
-                            locked_quote += (q * p)
-                    except:
-                        pass
+                locked_base, locked_quote = calculate_locked_funds(open_orders)
 
                 # Check Inventory using Shared Capital
                 # If capital_tracker is provided (Batch mode), use it. Otherwise use global wallets
@@ -528,39 +468,11 @@ class MarketMaker:
                 if not should_sell:
                     logger.debug(f"{market}: Insufficient {base} for SELL (Have {base_balance}, Need {required_qty})")
     
-                # 3. SMART ORDER MAINTENANCE (Diffing)
+                # 3. SMART ORDER MAINTENANCE (Diffing) - using helper function
                 open_orders = open_orders or []
-                
-                # Helper to check if we resemble an order
-                def is_match(order, target_price, target_qty, side):
-                    if order["side"] != side: return False
-                    o_price = float(order["price"])
-                    o_qty = float(order["quantity"])
-                    # Tolerance: Price exact (0.001), Qty strict (0.01)
-                    return abs(o_price - target_price) < 0.001 and abs(o_qty - target_qty) < 0.01
-    
-                orders_to_cancel = []
-                buy_active = False
-                sell_active = False
-                
-                for o in open_orders:
-                    # ID Key Helper
-                    oid = o.get("id") or o.get("order_id")
-                    
-                    if not oid:
-                        logger.warning(f"{market}: Order missing ID: {o}")
-                        continue
-    
-                    if o["side"] == "buy":
-                        if should_buy and is_match(o, buy_price, required_qty, "buy"):
-                            buy_active = True 
-                        else:
-                            orders_to_cancel.append(oid)
-                    elif o["side"] == "sell":
-                        if should_sell and is_match(o, sell_price, sell_qty, "sell"):
-                            sell_active = True
-                        else:
-                            orders_to_cancel.append(oid)
+                orders_to_cancel, buy_active, sell_active = diff_orders(
+                    open_orders, buy_price, required_qty, sell_price, sell_qty, should_buy, should_sell
+                )
     
                 # Execute Changes (Cancel Stale)
                 for oid in orders_to_cancel:
@@ -624,7 +536,8 @@ class MarketMaker:
                 # Catch strict errors in earlier logic (calc price, wallet check)
                 logger.error(f"Error preparing {market}: {e}")
 
-    async def place_orders_parallel(self):
+    async def place_orders_parallel(self) -> None:
+        """Process all markets in parallel with shared capital tracker."""
         try:
             # Update wallets once
             await self._update_wallets()
@@ -668,8 +581,8 @@ class MarketMaker:
             logger.error(f"Critical error in place_orders_parallel: {e}")
             # Do NOT propagate to run(), just log and skip this cycle
 
-    async def run(self):
-        """Main execution loop."""
+    async def run(self) -> None:
+        """Main execution loop with retry and health check."""
         
         # 1. Robust Startup: Retry until API is available
         while True:
@@ -782,7 +695,8 @@ class MarketMaker:
             except Exception as e:
                 logger.error(f"Error cancelling orders on exit: {e}")
 
-async def main():
+async def main() -> None:
+    """Entry point for the market maker bot."""
     bot = MarketMaker(API_KEY, API_ENDPOINT)
     await bot.run()
 
