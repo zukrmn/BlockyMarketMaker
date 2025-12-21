@@ -33,3 +33,8 @@ htmlcov/
 # Logs
 logs/
 *.log
+
+# PyInstaller build
+build/
+dist/
+*.spec.bak

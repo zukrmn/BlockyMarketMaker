@@ -95,7 +95,23 @@ When someone sells you a diamond for 49 and later someone buys it for 51, you pr
 
 ## Quick Start
 
-### Option 1: Run Locally (Recommended for First Time)
+### Option 1: Windows Executable (Easiest)
+
+For Windows users who prefer not to install Python:
+
+1. Download `BlockyMarketMaker.exe` from the [Releases](https://github.com/zukrmn/BlockyMarketMaker/releases) page
+2. Double-click to run
+3. Complete the setup wizard:
+   - Enter your Blocky API key
+   - Configure trading settings
+   - Select markets
+4. The bot will start automatically
+
+The setup wizard explains each setting and helps you configure unique values to avoid conflicts with other users.
+
+---
+
+### Option 2: Run Locally with Python
 
 #### Step 1: Install Python
 
@@ -153,7 +169,7 @@ Press `Ctrl+C` to stop the bot. It will:
 - Save metrics to disk
 - Close connections properly
 
-### Option 2: Manual Configuration
+### Option 3: Manual Configuration
 
 Create a `.env` file:
 
@@ -521,6 +537,88 @@ Logs show `[DRY-RUN]` prefix for simulated actions.
 
 ---
 
+## Building the Windows Executable
+
+For developers who want to build the `.exe` themselves.
+
+### Prerequisites
+
+1. **Python 3.11+** installed
+   - Download from [python.org](https://www.python.org/downloads/)
+   - During installation, check **"Add Python to PATH"**
+   - Verify: `python --version`
+
+2. **Git** installed
+   - Download from [git-scm.com](https://git-scm.com/downloads)
+
+### Build Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/zukrmn/BlockyMarketMaker.git
+cd BlockyMarketMaker
+
+# 2. Install project dependencies
+pip install -r requirements.txt
+
+# 3. Install PyInstaller
+pip install pyinstaller
+
+# 4. Build the executable
+build_exe.bat
+```
+
+Or build manually:
+```bash
+pyinstaller blocky.spec --clean
+```
+
+### Build Output
+
+- **Executable**: `dist/BlockyMarketMaker.exe`
+- **Expected size**: ~50-80MB
+- **Build time**: 1-3 minutes
+
+### Testing the Build
+
+1. Create a new empty folder (e.g., `C:\BlockyTest\`)
+2. Copy `dist/BlockyMarketMaker.exe` to this folder
+3. Copy `config.yaml` to the same folder (as template)
+4. Double-click `BlockyMarketMaker.exe`
+5. The setup wizard should open
+
+### Distributing
+
+To share with other users, they only need:
+- `BlockyMarketMaker.exe`
+- `config.yaml` (optional, will use defaults if missing)
+
+Users do NOT need Python installed.
+
+### Troubleshooting Build Issues
+
+| Problem | Solution |
+|---------|----------|
+| `python not found` | Reinstall Python with "Add to PATH" checked |
+| `pip not found` | Run `python -m pip install --upgrade pip` |
+| `ModuleNotFoundError` during build | Run `pip install <module_name>` and rebuild |
+| Build succeeds but exe crashes | Check for missing hidden imports in `blocky.spec` |
+| Antivirus blocks/deletes exe | Add exception for `dist/` folder (false positive) |
+| Windows SmartScreen warning | Click "More info" → "Run anyway" |
+| Exe size is 200MB+ | Something wrong with spec, rebuild with `--clean` |
+
+### Adding an Icon (Optional)
+
+1. Create or download a `.ico` file
+2. Save as `img/icon.ico`
+3. Uncomment the icon line in `blocky.spec`:
+   ```python
+   icon='img/icon.ico',
+   ```
+4. Rebuild
+
+---
+
 </details>
 
 ---
@@ -614,7 +712,23 @@ Quando alguém te vende um diamante por 49 e depois alguém compra por 51, você
 
 ## Início Rápido
 
-### Opção 1: Rodar Localmente (Recomendado)
+### Opção 1: Executável Windows (Mais Fácil)
+
+Para usuários Windows que preferem não instalar Python:
+
+1. Baixe `BlockyMarketMaker.exe` da página de [Releases](https://github.com/zukrmn/BlockyMarketMaker/releases)
+2. Dê duplo clique para executar
+3. Complete o assistente de configuração:
+   - Digite sua chave API da Blocky
+   - Configure parâmetros de trading
+   - Selecione mercados
+4. O bot iniciará automaticamente
+
+O assistente explica cada configuração e ajuda a definir valores únicos para evitar conflitos com outros usuários.
+
+---
+
+### Opção 2: Rodar Localmente com Python
 
 #### Passo 1: Instalar Python
 
@@ -672,7 +786,7 @@ Pressione `Ctrl+C` para parar. O bot irá:
 - Salvar métricas
 - Fechar conexões
 
-### Opção 2: Configuração Manual
+### Opção 3: Configuração Manual
 
 Crie um arquivo `.env`:
 
@@ -1037,6 +1151,88 @@ trading:
 ```
 
 Logs mostram `[DRY-RUN]` para ações simuladas.
+
+---
+
+## Compilando o Executável Windows
+
+Para desenvolvedores que desejam compilar o `.exe`.
+
+### Pré-requisitos
+
+1. **Python 3.11+** instalado
+   - Baixe em [python.org](https://www.python.org/downloads/)
+   - Durante a instalação, marque **"Add Python to PATH"**
+   - Verifique: `python --version`
+
+2. **Git** instalado
+   - Baixe em [git-scm.com](https://git-scm.com/downloads)
+
+### Passos para Compilar
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/zukrmn/BlockyMarketMaker.git
+cd BlockyMarketMaker
+
+# 2. Instale as dependências
+pip install -r requirements.txt
+
+# 3. Instale o PyInstaller
+pip install pyinstaller
+
+# 4. Compile o executável
+build_exe.bat
+```
+
+Ou compile manualmente:
+```bash
+pyinstaller blocky.spec --clean
+```
+
+### Resultado da Compilação
+
+- **Executável**: `dist/BlockyMarketMaker.exe`
+- **Tamanho esperado**: ~50-80MB
+- **Tempo de build**: 1-3 minutos
+
+### Testando o Build
+
+1. Crie uma pasta vazia (ex: `C:\BlockyTest\`)
+2. Copie `dist/BlockyMarketMaker.exe` para esta pasta
+3. Copie `config.yaml` para a mesma pasta (como template)
+4. Dê duplo clique em `BlockyMarketMaker.exe`
+5. O assistente de configuração deve abrir
+
+### Distribuindo
+
+Para compartilhar com outros usuários, eles precisam apenas de:
+- `BlockyMarketMaker.exe`
+- `config.yaml` (opcional, usa padrões se ausente)
+
+Usuários NÃO precisam ter Python instalado.
+
+### Solução de Problemas de Build
+
+| Problema | Solução |
+|----------|---------|
+| `python not found` | Reinstale Python marcando "Add to PATH" |
+| `pip not found` | Execute `python -m pip install --upgrade pip` |
+| `ModuleNotFoundError` durante build | Execute `pip install <modulo>` e recompile |
+| Build funciona mas exe trava | Verifique hidden imports em `blocky.spec` |
+| Antivírus bloqueia/deleta exe | Adicione exceção para pasta `dist/` (falso positivo) |
+| Aviso do Windows SmartScreen | Clique "Mais informações" → "Executar assim mesmo" |
+| Exe com 200MB+ | Algo errado no spec, recompile com `--clean` |
+
+### Adicionando um Ícone (Opcional)
+
+1. Crie ou baixe um arquivo `.ico`
+2. Salve como `img/icon.ico`
+3. Descomente a linha do ícone em `blocky.spec`:
+   ```python
+   icon='img/icon.ico',
+   ```
+4. Recompile
 
 ---
 
