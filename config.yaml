@@ -11,7 +11,7 @@ api:
 trading:
   dry_run: false                  # Set true to simulate without real orders
   enabled_markets: []             # Whitelist: empty = all markets, otherwise only these
-  disabled_markets: [sand_iron, rmus_iron]  # Blacklist: API returns empty orderbooks for these
+  disabled_markets: []  # Temporarily enabled for API testing
   # Example: disabled_markets: [sand_iron, dirt_iron]
   spread: 0.05                    # 5% spread (0.05 = 5%)
   min_spread_ticks: 0.01          # Minimum spread in price units
