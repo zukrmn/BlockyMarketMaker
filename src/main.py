@@ -4,6 +4,8 @@ import time
 import logging
 from typing import List, Dict
 from dotenv import load_dotenv
+
+# Internal imports (relative within src package)
 from blocky import Blocky, BlockyWebSocket, CircuitBreakerOpen
 from price_model import PriceModel
 from spread_calculator import SpreadCalculator, SpreadConfig
@@ -11,6 +13,7 @@ from metrics import MetricsTracker
 from alerts import AlertManager, AlertLevel
 from config import get_config
 from health import HealthServer
+
 
 # Load environment variables from .env file
 load_dotenv(override=True)

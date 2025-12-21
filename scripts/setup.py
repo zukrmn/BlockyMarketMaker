@@ -217,7 +217,7 @@ def main():
     print_success(f"Configuração salva em {ENV_FILE}")
     print()
     print_info("Para iniciar o bot, execute:")
-    print(f"  {Colors.CYAN}python bot.py{Colors.RESET}")
+    print(f"  {Colors.CYAN}python run.py{Colors.RESET}")
     print()
     print_info("Para modificar configurações avançadas, edite:")
     print(f"  {Colors.CYAN}config.yaml{Colors.RESET}")

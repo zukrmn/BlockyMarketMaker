@@ -1,7 +1,7 @@
 # Production Dockerfile using distroless image
 # This creates a minimal, secure image for deployment
 #
-# Build: docker build -f Dockerfile.prod -t blocky-market-maker:prod .
+# Build: docker build -f docker/Dockerfile -t blocky-market-maker:prod .
 # Run:   docker run --rm -v $(pwd)/.env:/app/.env blocky-market-maker:prod
 
 # --- Stage 1: The Builder ---
@@ -30,11 +30,12 @@ COPY --from=builder /app/packages /app/packages
 # Copy your application code
 COPY . .
 
-# Tell Python where to find the packages
+# Tell Python where to find the packages and src modules
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH="/app/packages"
+ENV PYTHONPATH="/app/packages:/app/src"
 
-# Run the bot
+# Run the bot via run.py entry point
 # Note: distroless python image uses /usr/bin/python3.11 as entrypoint
-CMD ["bot.py"]
+CMD ["run.py"]
+

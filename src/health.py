@@ -14,7 +14,7 @@ except ImportError:
     web = None
 
 if TYPE_CHECKING:
-    from bot import MarketMaker
+    from main import MarketMaker
 
 logger = logging.getLogger(__name__)
 

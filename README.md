@@ -60,10 +60,10 @@ cd BlockyMarketMaker
 pip install -r requirements.txt
 
 # 3. Run the interactive setup (creates .env file)
-python setup.py
+python scripts/setup.py
 
 # 4. Start the bot
-python bot.py
+python run.py
 ```
 
 The setup wizard will ask for:
@@ -85,7 +85,7 @@ Then run:
 
 ```bash
 pip install -r requirements.txt
-python bot.py
+python run.py
 ```
 
 ---
@@ -95,12 +95,12 @@ python bot.py
 ### Build the Image
 
 ```bash
-docker build -f Dockerfile.prod -t blocky-market-maker:prod .
+docker build -f docker/Dockerfile -t blocky-market-maker:prod .
 ```
 
 ### Run the Container
 
-**Important:** Create your `.env` file first (via `python setup.py` or manually).
+**Important:** Create your `.env` file first (via `python scripts/setup.py` or manually).
 
 ```bash
 # Run with .env mounted
@@ -413,10 +413,10 @@ cd BlockyMarketMaker
 pip install -r requirements.txt
 
 # 3. Execute o setup interativo (cria arquivo .env)
-python setup.py
+python scripts/setup.py
 
 # 4. Inicie o bot
-python bot.py
+python run.py
 ```
 
 O assistente de configuração vai pedir:
@@ -438,7 +438,7 @@ Depois execute:
 
 ```bash
 pip install -r requirements.txt
-python bot.py
+python run.py
 ```
 
 ---
@@ -448,12 +448,12 @@ python bot.py
 ### Construir a Imagem
 
 ```bash
-docker build -f Dockerfile.prod -t blocky-market-maker:prod .
+docker build -f docker/Dockerfile -t blocky-market-maker:prod .
 ```
 
 ### Rodar o Container
 
-**Importante:** Crie seu arquivo `.env` primeiro (via `python setup.py` ou manualmente).
+**Importante:** Crie seu arquivo `.env` primeiro (via `python scripts/setup.py` ou manualmente).
 
 ```bash
 # Rodar com .env montado
@@ -475,7 +475,7 @@ services:
   market-maker:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     ports:
       - "8080:8080"
