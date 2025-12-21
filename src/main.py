@@ -6,7 +6,8 @@ from typing import List, Dict, Optional, Any, Callable, Tuple
 from dotenv import load_dotenv
 
 # Internal imports (relative within src package)
-from blocky import Blocky, BlockyWebSocket, CircuitBreakerOpen
+from blocky import BlockyWebSocket, CircuitBreakerOpen
+from blocky.async_client import AsyncBlocky
 from price_model import PriceModel
 from spread_calculator import SpreadCalculator, SpreadConfig
 from metrics import MetricsTracker
@@ -18,8 +19,10 @@ from trading_helpers import (
     apply_pennying,
     calculate_locked_funds,
     calculate_order_quantities,
+    calculate_order_quantities,
     diff_orders
 )
+from data_recorder import DataRecorder
 
 
 # Load environment variables from .env file
@@ -42,13 +45,25 @@ class ColoredFormatter(logging.Formatter):
         record.levelname = f"{color}{record.levelname:8s}{self.RESET}"
         return super().format(record)
 
-# Setup handler with colored output
-handler = logging.StreamHandler()
-handler.setFormatter(ColoredFormatter(
+# Setup console handler with colored output
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(ColoredFormatter(
     fmt='%(asctime)s │ %(levelname)s │ %(message)s',
     datefmt='%H:%M:%S'
 ))
-logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+# Setup file handler for persistent logging
+LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, 'bot.log')
+
+file_handler = logging.FileHandler(LOG_FILE, mode='a', encoding='utf-8')
+file_handler.setFormatter(logging.Formatter(
+    fmt='%(asctime)s │ %(levelname)-8s │ %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+))
+
+logging.basicConfig(level=logging.INFO, handlers=[console_handler, file_handler])
 logger = logging.getLogger(__name__)
 
 # Configuration - Load from config.yaml with env var overrides
@@ -67,13 +82,14 @@ class MarketMaker:
     """Automated market maker bot for Blocky exchange."""
     
     def __init__(self, api_key: str, endpoint: str) -> None:
-        self.client = Blocky(api_key=api_key, endpoint=endpoint)
+        self.client = AsyncBlocky(api_key=api_key, endpoint=endpoint)
         self.endpoint = endpoint
         self.price_model = PriceModel(
             self.client, 
             base_prices=config.price_model.base_prices
         )
-        self.markets = self._fetch_markets()
+        # self.markets resolved in run() now since it needs async call
+        self.markets = []
         self.wallets = {}
         self.last_wallet_update = 0
         self.available_capital = {}
@@ -110,6 +126,7 @@ class MarketMaker:
             volatility_window=config.dynamic_spread.volatility_window
         )
         self.spread_calculator = SpreadCalculator(self.client, spread_config)
+        self.recorder = DataRecorder() # Initialize Recorder
         
         if spread_config.enabled:
             logger.info("📊 Dynamic spread calculation enabled")
@@ -124,23 +141,43 @@ class MarketMaker:
                 # Log only on transaction to reduce noise, or debug for orderbook
                 if "transactions" in channel:
                      logger.info(f"WS Event: Trade on {market}")
+                     # Parse trade data from payload
+                     payload = data.get("payload", {})
+                     # Payload usually mimics the trade object: {price, quantity, side}
+                     # We need to verify the exact structure in logs if this fails, but standard is root or nested.
+                     # Assuming standard Blocky WS format based on other integrations.
+                     price = float(payload.get("price", 0))
+                     quantity = float(payload.get("quantity", 0) or payload.get("amount", 0))
+                     side = payload.get("side", "buy")
+                     
+                     if price > 0:
+                        self.metrics.record_public_trade(market, price, side, quantity)
+                        # Log trade using recorder
+                        await self.recorder.log_trade(market, payload)
                 
                 # Fetch supplies cache (safe to use stale for 60s)
                 # We do NOT await get_circulating_supply here if it does network call, 
                 # but it uses cache logic. 
-                supplies = await self._run_sync(self.price_model.get_circulating_supply)
+                # Fetch supplies cache (safe to use stale for 60s)
+                # We do NOT await get_circulating_supply here if it does network call, 
+                # but it uses cache logic. 
+                supplies = await self.price_model.get_circulating_supply()
                 
-                # Fetch Open Orders JUST for this market
+                # Fetch Open Orders for this market
+                # Note: Blocky API ignores filter params, so we filter client-side
                 my_orders = []
                 try:
-                    # Optimized fetch for single market
-                    response = await self._run_sync(
-                        self.client.get_orders, 
+                    response = await self.client.get_orders( 
                         statuses=["open"], 
-                        markets=[market]  # Filter by market
+                        markets=[market]
                     )
                     if response.get("success"):
-                         my_orders = response.get("orders", [])
+                        # Client-side filtering: API ignores status and market filters
+                        for order in response.get("orders", []):
+                            order_market = order.get("market", "")
+                            order_status = order.get("status", "").lower()
+                            if order_market == market and order_status in ["open", "pending", "new"]:
+                                my_orders.append(order)
                 except Exception as e:
                     logger.error(f"{market}: Failed to fetch open orders in WS handler: {e}")
                     return # Skip processing if we can't see our orders (safety)
@@ -157,19 +194,12 @@ class MarketMaker:
         except Exception as e:
             logger.error(f"WS Handler Error: {e}")
 
-    async def _run_sync(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
-        """Runs a synchronous function in a thread pool."""
-        loop = asyncio.get_running_loop()
-        from functools import partial
-        return await loop.run_in_executor(None, partial(func, *args, **kwargs))
 
-    def _fetch_markets(self) -> List[str]:
+    async def _fetch_markets(self) -> List[str]:
         """Fetches available markets from the API and applies config filters."""
         logger.info("Fetching available markets...")
         try:
-            # this is called in __init__, so it can stay sync blocking or we need to move it to a factory/run method
-            # For now it's in init, so keep sync.
-            response = self.client.get_markets()
+            response = await self.client.get_markets()
             if response.get("success"):
                 all_markets = [m["market"] for m in response.get("markets", [])]
                 
@@ -201,7 +231,7 @@ class MarketMaker:
             return
             
         try:
-            response = await self._run_sync(self.client.get_wallets)
+            response = await self.client.get_wallets()
             if response.get("success"):
                 new_wallets = {}
                 # Handle varying API response keys
@@ -222,17 +252,20 @@ class MarketMaker:
             logger.error(f"Error fetching wallets: {e}")
 
     async def _fetch_open_orders(self) -> Dict[str, List[dict]]:
-        """Fetches all open orders and maps them by market."""
+        """Fetches all open orders and maps them by market.
+        
+        Note: The Blocky API ignores filter parameters (status, market), so we
+        must filter client-side.
+        """
         open_orders = {}
         cursor = None
         has_more = True
         
         try:
             while has_more:
-                response = await self._run_sync(
-                    self.client.get_orders, 
+                response = await self.client.get_orders( 
                     statuses=["open"], 
-                    limit=50, # Fix: Max limit is 50
+                    limit=50,
                     cursor=cursor
                 )
                 
@@ -242,7 +275,15 @@ class MarketMaker:
                         break
                         
                     for order in orders:
-                        m = order["market"]
+                        # Client-side filtering: API ignores status filter
+                        status = order.get("status", "").lower()
+                        if status not in ["open", "pending", "new"]:
+                            continue
+
+                        m = order.get("market")
+                        if not m:
+                            continue
+                            
                         if m not in open_orders:
                             open_orders[m] = []
                         open_orders[m].append(order)
@@ -280,8 +321,7 @@ class MarketMaker:
         """Polls recent trades from API and records them in metrics for P&L tracking."""
         try:
             # Fetch recent trades (limit 50, newest first)
-            response = await self._run_sync(
-                self.client.get_trades,
+            response = await self.client.get_trades(
                 limit=50,
                 sort_order="desc"
             )
@@ -352,25 +392,57 @@ class MarketMaker:
                 await self._update_wallets()
 
                 # 1. Calculate Fair Price
-                mid_price = await self._run_sync(self.price_model.calculate_fair_price, market)
-                
+                mid_price = await self.price_model.calculate_fair_price(market)
                 
                 # Fallback to ticker
                 if mid_price <= 0 and ticker:
                      mid_price = float(ticker.get("close", 0) or ticker.get("last", 0) or 0)
                 elif mid_price <= 0:
-                     t = await self._run_sync(self.client.get_ticker, market)
+                     t = await self.client.get_ticker(market)
                      mid_price = float(t.get("close", 0))
     
                 if mid_price == 0:
                     return
-    
+
+                # Update metrics with current price so sidebar/dashboard has data even without trades
+                change = float(ticker.get("change", 0)) if ticker else 0.0
+                self.metrics.update_market_price(market, mid_price, change_24h=change)
+
+                # CALCULATE VISUAL STRATEGY PRICES FOR DASHBOARD
+                # This doesn't affect trading, just shows what other strategies would do
+                strat_prices = {}
+                active_strat = config.strategy.type
+                
+                # We need to simulate price calc for other strategies
+                # Scarcity (default logic approx)
+                inventory = self.wallets.get(market.split('_')[0], 0)
+                scarcity_mult = 1.0 + (0.01 if inventory < 10 else -0.01) # Dummy logic for viz if not creating full objects
+                strat_prices['scarcity'] = {'price': mid_price * scarcity_mult, 'confidence': 80}
+                
+                # VWAP (Approx)
+                vwap_price = mid_price * 0.99 # Mock logic for what VWAP usually is relative to mid
+                strat_prices['vwap'] = {'price': vwap_price, 'confidence': 60}
+                
+                # Ticker
+                ticker_price = float(ticker.get("last", mid_price)) if ticker else mid_price
+                strat_prices['ticker'] = {'price': ticker_price, 'confidence': 100}
+                
+                # Composite (The actual Fair Price calculated)
+                strat_prices['composite'] = {'price': mid_price, 'confidence': 90}
+
+                # Mark active
+                if active_strat in strat_prices:
+                    strat_prices[active_strat]['active'] = True
+                
+                self.metrics.update_strategy_prices(market, strat_prices)
+
+
                 # Calculate Dynamic Spread
                 base, quote = market.split('_')  # e.g. ston, iron
                 base_inventory = self.wallets.get(base.lower(), 0)
                 
                 # Get asymmetric spreads based on volatility + inventory
-                buy_spread, sell_spread = self.spread_calculator.get_dynamic_spread(
+                buy_spread, sell_spread = await self.spread_calculator.get_dynamic_spread(
                     market, 
                     inventory=base_inventory,
                     ticker=ticker
@@ -433,18 +505,34 @@ class MarketMaker:
     
                 should_buy = (quote_balance >= (buy_price * required_qty)) and (required_qty > 0)
                 
-                # Atomic Iron allocation: read + decision + write under same lock
                 if should_buy and quote == "iron" and capital_tracker is not None:
                     async with self.capital_lock:
-                        # Re-check balance under lock (another coroutine may have consumed it)
-                        current_balance = capital_tracker.get(quote.lower(), 0) + locked_quote
+                        # Re-check balance under lock using shared tracker (Available)
+                        avail = capital_tracker.get(quote.lower(), 0)
                         cost = buy_price * required_qty
-                        if current_balance >= cost:
-                            # Decrement the tracker (not including locked_quote in decrement)
-                            capital_tracker[quote.lower()] = max(0, capital_tracker.get(quote.lower(), 0) - cost)
+                        
+                        # Calculate net change required from Shared Pool
+                        # If Cost > Locked, we take difference from Avail.
+                        # If Cost < Locked, we return difference to Avail.
+                        needed_from_tracker = cost - locked_quote
+                        
+                        if needed_from_tracker > 0:
+                            if avail >= needed_from_tracker:
+                                capital_tracker[quote.lower()] = avail - needed_from_tracker
+                            else:
+                                # Insufficient shared funds for expansion. Attempt resize to match Max Available.
+                                max_afford = locked_quote + avail
+                                if max_afford > 0.10: # Min threshold
+                                    # logger.info(f"{market}: Capital constrained. Resizing {cost:.2f} -> {max_afford:.2f}")
+                                    cost = max_afford
+                                    required_qty = float(f"{(cost / buy_price):.2f}")
+                                    capital_tracker[quote.lower()] = 0.0 # Consumed all avail
+                                else:
+                                    should_buy = False
+                                    logger.debug(f"{market}: Insufficient capital (Race).")
                         else:
-                            should_buy = False
-                            logger.debug(f"{market}: Iron allocation race detected, skipping buy.")
+                             # Return surplus to shared pool
+                             capital_tracker[quote.lower()] = avail + abs(needed_from_tracker)
                 
                 should_sell = base_balance >= required_qty # Sell logic remains same (we sell what we have, up to limit)
                 # Actually for selling, if we don't have enough for TARGET size, we should sell ALL we have?
@@ -475,63 +563,86 @@ class MarketMaker:
                 )
     
                 # Execute Changes (Cancel Stale)
-                for oid in orders_to_cancel:
-                    if config.trading.dry_run:
-                        logger.info(f"🧪 [DRY-RUN] {market}: Would cancel order {oid}")
-                        self.metrics.record_order_cancelled()
-                    else:
-                        logger.info(f"{market}: Cancelling order {oid} (Diff Mismatch).")
-                        try:
-                            await self._run_sync(self.client.cancel_order, order_id=oid)
+                if orders_to_cancel:
+                    cancel_tasks = []
+                    for oid in orders_to_cancel:
+                        if config.trading.dry_run:
+                            logger.info(f"🧪 [DRY-RUN] {market}: Would cancel order {oid}")
                             self.metrics.record_order_cancelled()
-                        except Exception as e:
-                            # 1102 or 'Not Open' means it's already done.
-                            if "1102" in str(e) or "Not Open" in str(e):
-                                logger.debug(f"{market}: Order {oid} already closed (benign race).")
+                        else:
+                            logger.info(f"{market}: Cancelling order {oid} (Diff Mismatch).")
+                            cancel_tasks.append(self.client.cancel_order(order_id=oid))
+
+                    if cancel_tasks:
+                        results = await asyncio.gather(*cancel_tasks, return_exceptions=True)
+                        for res in results:
+                            if isinstance(res, Exception):
+                                 if "1102" in str(res) or "Not Open" in str(res):
+                                     logger.debug(f"{market}: Order already closed (benign race).")
+                                 else:
+                                     logger.error(f"{market}: Failed to cancel order: {res}")
                             else:
-                                logger.error(f"{market}: Failed to cancel {oid}: {e}")
-    
+                                self.metrics.record_order_cancelled()
+
                 # Execute Changes (Create New)
+                create_tasks = []
+                
                 if should_buy and not buy_active and buy_price > 0:
                     if config.trading.dry_run:
                         logger.info(f"🧪 [DRY-RUN] {market}: Would place Buy {buy_price:.2f} x {required_qty}")
                         self.metrics.record_order_placed()
                         self.metrics.record_spread(market, buy_price, sell_price)
                     else:
-                        try:
-                            await self._run_sync(
-                                self.client.create_order,
-                                market=market, side="buy", type_="limit", 
-                                price=f"{buy_price:.2f}", quantity=f"{required_qty:.2f}"
+                        create_tasks.append(
+                            self.client.create_order(
+                                 market=market, side="buy", type_="limit", 
+                                 price=f"{buy_price:.2f}", quantity=f"{required_qty:.2f}"
                             )
-                            logger.info(f"{market}: Placed Buy {buy_price:.2f} x {required_qty}")
-                            self.metrics.record_order_placed()
-                            self.metrics.record_spread(market, buy_price, sell_price)
-                        except Exception as e:
-                            if "3003" in str(e) or "Funds error" in str(e):
-                                logger.warning(f"{market}: Buy failed - Insufficient funds.")
-                            else:
-                                logger.error(f"{market}: Buy failed: {e}")
+                        )
                 
                 if should_sell and not sell_active and sell_price > 0:
                     if config.trading.dry_run:
                         logger.info(f"🧪 [DRY-RUN] {market}: Would place Sell {sell_price:.2f} x {sell_qty}")
                         self.metrics.record_order_placed()
                     else:
-                        try:
-                            await self._run_sync(
-                                self.client.create_order,
-                                market=market, side="sell", type_="limit", 
-                                price=f"{sell_price:.2f}", quantity=f"{sell_qty:.2f}"
+                        create_tasks.append(
+                            self.client.create_order(
+                                 market=market, side="sell", type_="limit", 
+                                 price=f"{sell_price:.2f}", quantity=f"{sell_qty:.2f}"
                             )
-                            logger.info(f"{market}: Placed Sell {sell_price:.2f} x {sell_qty}")
-                            self.metrics.record_order_placed()
-                        except Exception as e:
-                            if "3003" in str(e) or "Funds error" in str(e):
-                                logger.warning(f"{market}: Sell failed - Insufficient inventory/funds.")
-                            else:
-                                logger.error(f"{market}: Sell failed: {e}")
-    
+                        )
+                
+                if create_tasks:
+                    results = await asyncio.gather(*create_tasks, return_exceptions=True)
+                    for res in results:
+                         if isinstance(res, Exception):
+                             if "3003" in str(res) or "Funds error" in str(res): # Check 3003 code
+                                 logger.warning(f"{market}: Order failed - Insufficient funds/inventory.")
+                             else:
+                                 logger.error(f"{market}: Place order failed: {res}")
+                         else:
+                             side = res.get("side", "unknown") if isinstance(res, dict) else "unknown"
+                             logger.info(f"{market}: Placed {side} order.")
+                             self.metrics.record_order_placed()
+                             if side == "buy":
+                                 self.metrics.record_spread(market, buy_price, sell_price)
+
+
+            
+                # Record Snapshot of Decision
+                await self.recorder.log_snapshot(market, {
+                    "mid_price": mid_price,
+                    "buy_price": buy_price,
+                    "sell_price": sell_price,
+                    "buy_active": buy_active,
+                    "sell_active": sell_active,
+                    "inventory_base": base_balance,
+                    "inventory_quote": quote_balance,
+                    "should_buy": should_buy,
+                    "should_sell": should_sell,
+                    "target_qty": required_qty
+                })
+
             except Exception as e:
                 # Catch strict errors in earlier logic (calc price, wallet check)
                 logger.error(f"Error preparing {market}: {e}")
@@ -548,7 +659,7 @@ class MarketMaker:
             # Pre-heat metrics cache sequentially
             supplies = {}
             try:
-                supplies = await self._run_sync(self.price_model.get_circulating_supply)
+                supplies = await self.price_model.get_circulating_supply()
             except Exception as e:
                 logger.error(f"Failed to fetch supplies: {e}")
                 supplies = {} # Safer fallback
@@ -556,7 +667,7 @@ class MarketMaker:
             # Fetch current market state (Tickers)
             ticker_map = {}
             try:
-                response = await self._run_sync(self.client.get_markets, get_tickers=True)
+                response = await self.client.get_markets(get_tickers=True)
                 if response.get("success"):
                     for m_data in response.get("markets", []):
                         if "ticker" in m_data:
@@ -581,15 +692,46 @@ class MarketMaker:
             logger.error(f"Critical error in place_orders_parallel: {e}")
             # Do NOT propagate to run(), just log and skip this cycle
 
+    async def _snapshot_loop(self):
+        """Background task to snapshot orderbooks periodically."""
+        while True:
+            try:
+                if not self.markets:
+                    await asyncio.sleep(5)
+                    continue
+
+                for market in self.markets:
+                    try:
+                        # Fetch full orderbook
+                        ob = await self.client.get_orderbook(market)
+                        if ob and ob.get("success"):
+                            await self.recorder.log_orderbook(market, ob)
+                    except Exception as e:
+                        logger.error(f"Snapshot Orderbook Error {market}: {e}")
+                    
+                    # Stagger requests slightly
+                    await asyncio.sleep(0.5)
+                
+                # Wait before next full cycle (e.g. every 30s)
+                await asyncio.sleep(30)
+            except asyncio.CancelledError:
+                break
+            except Exception as ex:
+                logger.error(f"Snapshot Loop Error: {ex}")
+                await asyncio.sleep(5)
+
     async def run(self) -> None:
         """Main execution loop with retry and health check."""
         
+        # Start Orderbook Snapshot Loop
+        asyncio.create_task(self._snapshot_loop())
+
         # 1. Robust Startup: Retry until API is available
         while True:
             logger.info("Initializing... (Checking API availability)")
             
             # Retry fetching markets
-            self.markets = self._fetch_markets()
+            self.markets = await self._fetch_markets()
             if not self.markets:
                 logger.warning("No markets found (or API down). Retrying in 5s...")
                 self.alerts.warning("Startup Delayed", "No markets found (API may be down). Retrying...")
@@ -604,8 +746,8 @@ class MarketMaker:
                 if config.trading.dry_run:
                     logger.warning("🧪 DRY-RUN MODE ENABLED - No real orders will be placed!")
                 else:
-                    logger.info("Cleaning up existing orders...")
-                    await self._run_sync(self.client.cancel_orders) 
+                    logger.info("Cleaning up existing existing orders...")
+                    await self.client.cancel_orders() 
                 
                 # Fetch initial wallets to verify auth and funds
                 await self._update_wallets()
@@ -690,15 +832,29 @@ class MarketMaker:
             
             logger.info("Shutting down... Cancelling all orders.")
             try:
-                await self._run_sync(self.client.cancel_orders)
+                await self.client.cancel_orders()
                 logger.info("All orders cancelled successfully.")
             except Exception as e:
                 logger.error(f"Error cancelling orders on exit: {e}")
+            
+            # Close HTTP Client (Fix unclosed session error)
+            await self.client.close()
 
 async def main() -> None:
-    """Entry point for the market maker bot."""
+    """Entry point for the market maker bot with dashboard."""
+    from dashboard import TradingDashboard
+    
     bot = MarketMaker(API_KEY, API_ENDPOINT)
-    await bot.run()
+    
+    # Start dashboard with bot integration
+    dashboard = TradingDashboard(bot=bot, port=8081)
+    await dashboard.start()
+    logger.info("📊 Dashboard started at http://localhost:8081/dashboard")
+    
+    try:
+        await bot.run()
+    finally:
+        await dashboard.stop()
 
 if __name__ == "__main__":
     try:

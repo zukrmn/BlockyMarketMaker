@@ -106,6 +106,11 @@ class HealthConfig(BaseModel):
     port: int = 8080
 
 
+class StrategyConfig(BaseModel):
+    """Strategy selection configuration."""
+    type: str = "composite"  # scarcity, ticker, vwap, composite
+
+
 class Config(BaseSettings):
     """
     Main configuration container with environment variable support.
@@ -127,6 +132,7 @@ class Config(BaseSettings):
     price_model: PriceModelConfig = Field(default_factory=PriceModelConfig)
     dynamic_spread: DynamicSpreadConfig = Field(default_factory=DynamicSpreadConfig)
     health: HealthConfig = Field(default_factory=HealthConfig)
+    strategy: StrategyConfig = Field(default_factory=StrategyConfig)
 
     model_config = {
         "extra": "ignore"

@@ -5,6 +5,7 @@
 
 # Data files
 metrics_data.json
+data/
 
 # Python cache
 __pycache__/
@@ -30,5 +31,5 @@ ENV/
 htmlcov/
 
 # Logs
+logs/
 *.log
-.devcontainer/*.log

@@ -8,7 +8,7 @@ import json
 import os
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field, asdict
-from collections import defaultdict
+from collections import defaultdict, deque
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,10 @@ class MetricsTracker:
             'sell_value': 0.0,
             'trade_count': 0,
             'spreads_captured': [],  # List of (buy_price, sell_price) pairs
+            'mid_price': 0.0,
+            'change': 0.0,
+            'recent_trades': deque(maxlen=50),  # Buffer for real-time dashboard display
+            'strategy_prices': {},  # Recent calculated prices for each strategy
         })
         
         # Overall metrics
@@ -119,6 +123,33 @@ class MetricsTracker:
                 'sell': sell_price,
                 'spread_pct': spread_pct
             })
+
+    def update_market_price(self, market: str, price: float, change_24h: float = 0.0):
+        """Update current market price stats."""
+        self.market_stats[market]['mid_price'] = price
+        self.market_stats[market]['change'] = change_24h
+
+    def record_public_trade(self, market: str, price: float, side: str, quantity: float):
+        """Records a public trade from WebSocket for dashboard display."""
+        try:
+            trade_data = {
+                'timestamp': time.time(),
+                'time_str': time.strftime("%H:%M:%S"),
+                'market': market,
+                'price': price,
+                'side': side.upper(),
+                'quantity': quantity
+            }
+            self.market_stats[market]['recent_trades'].appendleft(trade_data)
+        except Exception as e:
+            logger.error(f"Error recording public trade: {e}")
+
+    def update_strategy_prices(self, market: str, strategy_prices: Dict[str, dict]):
+        """
+        Update calculated prices for strategies for dashboard display.
+        strategy_prices: dict like {'scarcity': {'price': 50.1, 'confidence': 85}, ...}
+        """
+        self.market_stats[market]['strategy_prices'] = strategy_prices
     
     def record_order_placed(self):
         """Increments order placement counter."""
@@ -218,12 +249,19 @@ class MetricsTracker:
 
     def to_dict(self) -> dict:
         """Serializes metrics to a dictionary for JSON persistence."""
+        # Helper to recursively convert deques/sets to lists
+        stats_copy = {}
+        for k, v in self.market_stats.items():
+            stats_copy[k] = dict(v)
+            if 'recent_trades' in stats_copy[k]:
+                stats_copy[k]['recent_trades'] = list(stats_copy[k]['recent_trades'])
+
         return {
             'start_time': self.start_time,
             'inventory': dict(self.inventory),
             'cost_basis': dict(self.cost_basis),
             'trades': [asdict(t) for t in self.trades],
-            'market_stats': {k: dict(v) for k, v in self.market_stats.items()},
+            'market_stats': stats_copy,
             'total_iron_spent': self.total_iron_spent,
             'total_iron_received': self.total_iron_received,
             'orders_placed': self.orders_placed,
@@ -252,6 +290,19 @@ class MetricsTracker:
             
             # Restore market stats
             for market, stats in data.get('market_stats', {}).items():
+                # Backfill new keys for existing data
+                if 'recent_trades' not in stats:
+                    stats['recent_trades'] = deque(maxlen=50)
+                if 'strategy_prices' not in stats:
+                    stats['strategy_prices'] = {}
+                else:
+                    # Strategy prices might be loaded as dict, keep as is
+                    pass
+                
+                # Ensure recent_trades is deque if loaded from list
+                if isinstance(stats.get('recent_trades'), list):
+                    stats['recent_trades'] = deque(stats['recent_trades'], maxlen=50)
+                    
                 self.market_stats[market] = stats
             
             self.total_iron_spent = data.get('total_iron_spent', 0.0)

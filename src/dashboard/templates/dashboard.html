@@ -9,7 +9,86 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: #1e1e1e;
+        margin: 15% auto;
+        padding: 24px;
+        border: 1px solid #333;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        color: #e0e0e0;
+        animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .modal-title {
+        font-size: 1.5em;
+        margin-bottom: 16px;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .modal-text {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #ccc;
+    }
+</style>
+</head>
+
 <body>
+    <!-- Modal for Strategy Info -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modalTitle" class="modal-title">Título</div>
+            <div id="modalText" class="modal-text">Texto explicativo...</div>
+        </div>
+    </div>
+
     <div class="dashboard">
         <!-- Header -->
         <div class="header">
@@ -73,8 +152,10 @@
                 <div id="chart"></div>
                 <canvas class="chart-canvas" id="drawCanvas"></canvas>
                 <div class="drawing-tools">
-                    <button class="draw-btn active" id="btnCursor" title="Cursor (V)"
+                    <button class="draw-btn active" id="btnCursor" title="Cursor - Mover Gráfico (V)"
                         onclick="setDrawTool('cursor')">↖</button>
+                    <button class="draw-btn" id="btnSelect" title="Selecionar Desenho (S)"
+                        onclick="setDrawTool('select')">⊙</button>
                     <hr class="draw-separator">
                     <button class="draw-btn" id="btnLine" title="Linha de Tendência (T)"
                         onclick="setDrawTool('line')">╱</button>
@@ -148,6 +229,47 @@
 
     <script src="/static/js/drawing.js"></script>
     <script>
+        // Strategy Explanations
+        const strategyInfo = {
+            "scarcity": {
+                title: "Estratégia de Escassez",
+                text: "Ajusta o preço comprando e vendendo de acordo com o nível do estoque. Se o estoque está cheio, o preço cai para vender mais rápido. Se está vazio, o preço sobe para evitar ficar sem produtos."
+            },
+            "ticker": {
+                title: "Preço de Mercado (Ticker)",
+                text: "Representa o último preço negociado no mercado BlockyCRAFT real (sem influência do bot). É a referência de quanto outros jogadores estão pagando no momento."
+            },
+            "vwap": {
+                title: "Preço Médio Ponderado (VWAP)",
+                text: "O VWAP (Volume Weighted Average Price) calcula o preço médio considerando o volume das negociações. Dá uma noção melhor da tendência de preço real do que apenas o 'último trade'."
+            },
+            "composite": {
+                title: "Preço Composto (Final)",
+                text: "É o veredito final do robô. Esta estratégia combina todas as outras (Escassez, VWAP, Mercado) para decidir o 'Preço Justo' ideal para colocar as ordens de compra e venda agora."
+            }
+        };
+
+        function showStrategyInfo(strategy) {
+            const info = strategyInfo[strategy.toLowerCase()];
+            if (info) {
+                document.getElementById('modalTitle').innerText = info.title;
+                document.getElementById('modalText').innerText = info.text;
+                document.getElementById('infoModal').style.display = "block";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('infoModal').style.display = "none";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('infoModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
         // Initialize TradingView-style chart
         const chartContainer = document.getElementById('chartContainer');
         const chart = LightweightCharts.createChart(document.getElementById('chart'), {

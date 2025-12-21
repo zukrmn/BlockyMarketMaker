@@ -80,6 +80,9 @@ class AsyncCircuitBreaker:
             result = await func(*args, **kwargs)
             await self._on_success()
             return result
+        except RateLimitException:
+            # Don't count rate limits as system failures
+            raise
         except Exception as e:
             await self._on_failure()
             raise
@@ -105,9 +108,16 @@ class AsyncCircuitBreaker:
                 logger.warning("Circuit breaker: OPEN")
 
 
+class RateLimitException(Exception):
+    """Raised on 429 Too Many Requests."""
+    pass
+
+
 class CircuitBreakerOpen(Exception):
     """Raised when circuit breaker is open."""
     pass
+
+
 
 
 class AsyncBlocky:
@@ -149,7 +159,8 @@ class AsyncBlocky:
         method: str,
         endpoint: str,
         params: Optional[Dict] = None,
-        json: Optional[Dict] = None
+        json: Optional[Dict] = None,
+        ignore_status_codes: Optional[List[int]] = None
     ) -> Dict[str, Any]:
         """Make an async HTTP request with rate limiting and circuit breaker."""
         await self.rate_limiter.acquire()
@@ -159,7 +170,17 @@ class AsyncBlocky:
             url = f"{self.BASE_URL}/{endpoint}"
             
             async with session.request(method, url, params=params, json=json) as response:
-                data = await response.json()
+                try:
+                    data = await response.json(content_type=None)
+                except:
+                   # Fallback if empty or invalid json
+                   data = {}
+                
+                if response.status == 429:
+                    raise RateLimitException("Rate limit exceeded")
+
+                if ignore_status_codes and response.status in ignore_status_codes:
+                     return data
                 
                 if response.status >= 400:
                     error_msg = data.get("message", str(data))
@@ -240,12 +261,12 @@ class AsyncBlocky:
     
     async def cancel_order(self, order_id: int) -> Dict[str, Any]:
         """Cancel a specific order."""
-        return await self._request("DELETE", f"orders/{order_id}")
+        return await self._request("DELETE", f"orders/{order_id}", ignore_status_codes=[404])
     
     async def cancel_orders(self, market: Optional[str] = None) -> Dict[str, Any]:
         """Cancel all orders, optionally for a specific market."""
         endpoint = f"orders?market={market}" if market else "orders"
-        return await self._request("DELETE", endpoint)
+        return await self._request("DELETE", endpoint, ignore_status_codes=[404])
     
     # Trade endpoints
     async def get_trades(
@@ -259,5 +280,22 @@ class AsyncBlocky:
     
     # Supply metrics
     async def get_supply_metrics(self) -> Dict[str, Any]:
-        """Get item supply metrics."""
-        return await self._request("GET", "metrics/supply")
+        """Get item supply metrics (Bypasses Circuit Breaker)."""
+        # Manual request to avoid tripping CB on 404s (non-critical)
+        await self.rate_limiter.acquire()
+        try:
+            session = await self._get_session()
+            url = f"{self.BASE_URL}/metrics/supply"
+            async with session.get(url) as response:
+                if response.status == 404:
+                    return {} # Return empty if not found
+                    
+                data = await response.json(content_type=None) # Safe decode
+                if response.status >= 400:
+                    # Log but don't raise to breaker
+                    logger.warning(f"Metrics API error {response.status}: {data}")
+                    return {}
+                return data
+        except Exception as e:
+            logger.warning(f"Failed to fetch metrics: {e}")
+            return {}

@@ -11,14 +11,39 @@ Um bot automatizado de Market Making para o servidor de economia Blocky Minecraf
 
 ## 📖 Table of Contents
 
+- [What is Market Making?](#-what-is-market-making)
 - [Features](#-features)
 - [Requirements](#-requirements)
 - [Quick Start](#-quick-start)
 - [Running with Docker](#-running-with-docker)
 - [Configuration Guide](#-configuration-guide)
 - [Understanding the Bot](#-understanding-the-bot)
+- [Dashboard](#-dashboard)
 - [Monitoring](#-monitoring)
+- [Project Structure](#-project-structure)
+- [Understanding Log Messages](#-understanding-log-messages)
 - [Troubleshooting](#-troubleshooting)
+
+---
+
+## 💡 What is Market Making?
+
+**Market Making** is a trading strategy where you provide liquidity to a market by placing **buy** and **sell** orders simultaneously.
+
+### Simple Example:
+Imagine you want to trade diamonds:
+- You place a **BUY order** at 49 Iron (you're willing to buy diamonds for 49)
+- You place a **SELL order** at 51 Iron (you're willing to sell diamonds for 51)
+
+When someone sells you a diamond for 49 and later someone buys it for 51, you profit 2 Iron!
+
+**The "spread"** (51 - 49 = 2 Iron, or ~4%) is your profit margin.
+
+### Why use a bot?
+- Markets move 24/7 - you can't watch them constantly
+- The bot adjusts prices automatically based on supply/demand
+- It handles dozens of markets simultaneously
+- It responds to market changes in milliseconds
 
 ---
 
@@ -33,6 +58,7 @@ Um bot automatizado de Market Making para o servidor de economia Blocky Minecraf
 | **Circuit Breaker** | Protects against API failures with automatic recovery |
 | **Rate Limiting** | Respects API limits (30 req/sec) |
 | **Discord/Slack Alerts** | Get notified about errors and important events |
+| **Web Dashboard** | Real-time trading dashboard with charts |
 | **Health Endpoint** | HTTP `/health` for monitoring systems |
 | **Dry Run Mode** | Test strategies without real orders |
 | **Metrics & P&L** | Track your trading performance |
@@ -41,34 +67,87 @@ Um bot automatizado de Market Making para o servidor de economia Blocky Minecraf
 
 ## 📋 Requirements
 
-- Python 3.11+ (or Docker)
-- Blocky API Key (get it from the Blocky panel)
-- (Optional) Discord Webhook URL for alerts
+### Minimum Requirements
+- **Python 3.11+** (or Docker)
+- **Blocky API Key** (see below how to get it)
+- **Internet connection** (stable, for WebSocket)
+- **~100MB RAM** (the bot is lightweight)
+
+### How to Get Your Blocky API Key
+
+1. Go to the Blocky web panel: `https://craft.blocky.com.br`
+2. Log in with your Minecraft account
+3. Navigate to **Settings** or **API**
+4. Generate a new API key
+5. Copy and save it securely (you'll need it during setup)
+
+> ⚠️ **Important:** Never share your API key with anyone!
+
+### Optional
+- Discord Webhook URL (for alerts)
+- Docker (for containerized deployment)
 
 ---
 
 ## 🚀 Quick Start
 
-### Option 1: Run Locally (Recommended for First Time)
+### Option 1: Run Locally (Recommended for Beginners)
+
+#### Step 1: Install Python
+
+**Windows:**
+1. Download Python 3.11+ from [python.org](https://www.python.org/downloads/)
+2. Run the installer
+3. ✅ **Check "Add Python to PATH"** during installation
+4. Open Command Prompt and verify: `python --version`
+
+**macOS:**
+```bash
+brew install python@3.11
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install python3.11 python3-pip python3-venv
+```
+
+#### Step 2: Clone and Setup
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/zukrmn/BlockyMarketMaker.git
 cd BlockyMarketMaker
 
-# 2. Install dependencies
+# 2. Create a virtual environment (recommended)
+python -m venv venv
+
+# 3. Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run the interactive setup (creates .env file)
+# 5. Run the interactive setup (creates .env file)
 python scripts/setup.py
 
-# 4. Start the bot
+# 6. Start the bot
 python run.py
 ```
 
 The setup wizard will ask for:
 1. Your **Blocky API Key**
 2. (Optional) **Discord Webhook URL** for alerts
+
+#### Step 3: Stopping the Bot
+
+Press `Ctrl+C` in the terminal to stop the bot gracefully. It will:
+- Cancel all open orders
+- Save metrics to disk
+- Close connections properly
 
 ### Option 2: Manual Configuration
 
@@ -108,6 +187,7 @@ docker run --rm \
   -v $(pwd)/.env:/app/.env \
   -v $(pwd)/config.yaml:/app/config.yaml \
   -p 8080:8080 \
+  -p 8081:8081 \
   blocky-market-maker:prod
 ```
 
@@ -122,14 +202,16 @@ services:
   market-maker:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8080:8080"   # Health endpoint
+      - "8081:8081"   # Dashboard
     volumes:
       - ./.env:/app/.env:ro
       - ./config.yaml:/app/config.yaml:ro
-      - ./metrics_data.json:/app/metrics_data.json
+      - ./src/metrics_data.json:/app/src/metrics_data.json
+      - ./logs:/app/logs
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
       interval: 30s
@@ -297,6 +379,35 @@ WebSocket events (real-time):
 
 ---
 
+## 📊 Dashboard
+
+The bot includes a **real-time web dashboard** for monitoring your trading activity.
+
+### Accessing the Dashboard
+
+Once the bot is running, open your browser and go to:
+```
+http://localhost:8081/dashboard
+```
+
+### Dashboard Features
+
+- **📈 Live Price Charts**: Candlestick charts with real-time data
+- **📖 Order Book**: See current bids and asks
+- **💰 P&L Tracking**: Monitor your realized profits
+- **🎯 Strategy Cards**: View active pricing strategies
+- **📋 Market List**: Quick navigation between all markets
+- **🎨 Drawing Tools**: Add trendlines and annotations to charts
+
+### Dashboard Ports
+
+| Port | Service |
+|------|---------|
+| 8080 | Health endpoint (`/health`) |
+| 8081 | Web Dashboard (`/dashboard`) |
+
+---
+
 ## 📊 Monitoring
 
 ### Health Check
@@ -320,7 +431,7 @@ Response:
 
 ### Logs
 
-The bot outputs colored logs:
+The bot outputs colored logs to console and saves them to `logs/bot.log`:
 - 🟢 Green = INFO
 - 🟡 Yellow = WARNING  
 - 🔴 Red = ERROR
@@ -328,7 +439,59 @@ The bot outputs colored logs:
 
 ### Metrics Persistence
 
-Metrics are saved to `metrics_data.json` every 60 seconds and on shutdown.
+Metrics are saved to `src/metrics_data.json` every 60 seconds and on shutdown.
+
+---
+
+## 📁 Project Structure
+
+```
+BlockyMarketMaker/
+├── run.py                 # Entry point - run this to start the bot
+├── config.yaml            # Main configuration file
+├── requirements.txt       # Python dependencies
+├── .env                   # Your API keys (create this)
+│
+├── src/                   # Source code
+│   ├── main.py            # Bot main logic
+│   ├── blocky/            # Blocky API client
+│   ├── dashboard/         # Web dashboard
+│   ├── price_model.py     # Scarcity-based pricing
+│   ├── spread_calculator.py
+│   ├── trading_helpers.py
+│   └── ...
+│
+├── scripts/               # Utility scripts
+│   ├── setup.py           # Interactive setup wizard
+│   └── ...
+│
+├── docker/                # Docker configuration
+│   └── Dockerfile
+│
+├── logs/                  # Log files (auto-created)
+│   └── bot.log
+│
+├── data/                  # Market data for analysis (auto-created)
+│
+└── tests/                 # Unit tests
+```
+
+---
+
+## 📝 Understanding Log Messages
+
+Here's what common log messages mean:
+
+| Message | Meaning |
+|---------|---------|
+| `Placed buy order` | Successfully placed a buy order |
+| `Placed sell order` | Successfully placed a sell order |
+| `Cancelling order (Diff Mismatch)` | Price changed, old order being replaced |
+| `Insufficient funds` | Not enough Iron to place order |
+| `Circuit breaker OPEN` | Too many API errors, pausing requests |
+| `WS Event: Trade on X` | Someone traded on market X |
+| `Integrity Check` | Periodic check of all orders |
+| `🧪 [DRY-RUN]` | Simulated action (no real order) |
 
 ---
 
@@ -336,11 +499,21 @@ Metrics are saved to `metrics_data.json` every 60 seconds and on shutdown.
 
 | Problem | Solution |
 |---------|----------|
+| `BLOCKY_API_KEY not set` | Run `python scripts/setup.py` or create `.env` file |
 | `502 Bad Gateway` | Blocky API is down. Bot will auto-retry every 5s. |
 | `Circuit breaker OPEN` | Too many API errors. Will auto-recover in 30s. |
 | `Insufficient funds` | Add more Iron to your wallet or reduce `target_value`. |
 | `Rate limit reached` | Bot will auto-throttle. Check `rate_limit` settings. |
 | No orders placed | Check `enabled_markets`/`disabled_markets` config. |
+| Dashboard not loading | Make sure port 8081 is free. Check `http://localhost:8081/dashboard` |
+| `ModuleNotFoundError` | Activate virtual environment: `source venv/bin/activate` |
+
+### Before Your First Run
+
+1. ✅ Make sure you have **Iron in your Blocky wallet**
+2. ✅ Start with `dry_run: true` to test without real money
+3. ✅ Use a **single market** first: `enabled_markets: [diam_iron]`
+4. ✅ Check the dashboard to see what the bot is doing
 
 ### Dry Run Testing
 
@@ -364,14 +537,39 @@ Logs will show `🧪 [DRY-RUN]` prefix for simulated actions.
 
 ## 📖 Índice
 
+- [O que é Market Making?](#-o-que-é-market-making)
 - [Recursos](#-recursos)
 - [Requisitos](#-requisitos)
 - [Início Rápido](#-início-rápido)
 - [Rodando com Docker](#-rodando-com-docker)
 - [Guia de Configuração](#-guia-de-configuração)
 - [Entendendo o Bot](#-entendendo-o-bot)
+- [Dashboard](#-dashboard-1)
 - [Monitoramento](#-monitoramento)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Entendendo as Mensagens de Log](#-entendendo-as-mensagens-de-log)
 - [Solução de Problemas](#-solução-de-problemas)
+
+---
+
+## 💡 O que é Market Making?
+
+**Market Making** é uma estratégia de trading onde você fornece liquidez ao mercado colocando ordens de **compra** e **venda** simultaneamente.
+
+### Exemplo Simples:
+Imagine que você quer negociar diamantes:
+- Você coloca uma **ordem de COMPRA** a 49 Iron (você está disposto a comprar diamantes por 49)
+- Você coloca uma **ordem de VENDA** a 51 Iron (você está disposto a vender diamantes por 51)
+
+Quando alguém te vende um diamante por 49 e depois alguém compra por 51, você lucra 2 Iron!
+
+**O "spread"** (51 - 49 = 2 Iron, ou ~4%) é sua margem de lucro.
+
+### Por que usar um bot?
+- Mercados funcionam 24/7 - você não pode ficar assistindo o tempo todo
+- O bot ajusta preços automaticamente baseado em oferta/demanda
+- Ele gerencia dezenas de mercados simultaneamente
+- Responde a mudanças de mercado em milissegundos
 
 ---
 
@@ -386,6 +584,7 @@ Logs will show `🧪 [DRY-RUN]` prefix for simulated actions.
 | **Circuit Breaker** | Protege contra falhas na API com recuperação automática |
 | **Rate Limiting** | Respeita limites da API (30 req/seg) |
 | **Alertas Discord/Slack** | Notificações sobre erros e eventos importantes |
+| **Dashboard Web** | Dashboard de trading em tempo real com gráficos |
 | **Endpoint de Saúde** | HTTP `/health` para sistemas de monitoramento |
 | **Modo Dry Run** | Teste estratégias sem ordens reais |
 | **Métricas & P&L** | Acompanhe sua performance de trading |
@@ -394,34 +593,87 @@ Logs will show `🧪 [DRY-RUN]` prefix for simulated actions.
 
 ## 📋 Requisitos
 
-- Python 3.11+ (ou Docker)
-- Chave de API da Blocky (obtenha no painel da Blocky)
-- (Opcional) URL do Webhook do Discord para alertas
+### Requisitos Mínimos
+- **Python 3.11+** (ou Docker)
+- **Chave de API da Blocky** (veja abaixo como obter)
+- **Conexão com internet** (estável, para WebSocket)
+- **~100MB RAM** (o bot é leve)
+
+### Como Obter Sua Chave de API da Blocky
+
+1. Acesse o painel web da Blocky: `https://craft.blocky.com.br`
+2. Faça login com sua conta Minecraft
+3. Navegue até **Configurações** ou **API**
+4. Gere uma nova chave de API
+5. Copie e guarde em segurança (você vai precisar durante o setup)
+
+> ⚠️ **Importante:** Nunca compartilhe sua chave de API com ninguém!
+
+### Opcional
+- URL de Webhook do Discord (para alertas)
+- Docker (para deploy containerizado)
 
 ---
 
 ## 🚀 Início Rápido
 
-### Opção 1: Rodar Localmente (Recomendado para Primeira Vez)
+### Opção 1: Rodar Localmente (Recomendado para Iniciantes)
+
+#### Passo 1: Instalar Python
+
+**Windows:**
+1. Baixe Python 3.11+ em [python.org](https://www.python.org/downloads/)
+2. Execute o instalador
+3. ✅ **Marque "Add Python to PATH"** durante a instalação
+4. Abra o Prompt de Comando e verifique: `python --version`
+
+**macOS:**
+```bash
+brew install python@3.11
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install python3.11 python3-pip python3-venv
+```
+
+#### Passo 2: Clonar e Configurar
 
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/zukrmn/BlockyMarketMaker.git
 cd BlockyMarketMaker
 
-# 2. Instale as dependências
+# 2. Crie um ambiente virtual (recomendado)
+python -m venv venv
+
+# 3. Ative o ambiente virtual
+# No Windows:
+venv\Scripts\activate
+# No macOS/Linux:
+source venv/bin/activate
+
+# 4. Instale as dependências
 pip install -r requirements.txt
 
-# 3. Execute o setup interativo (cria arquivo .env)
+# 5. Execute o setup interativo (cria arquivo .env)
 python scripts/setup.py
 
-# 4. Inicie o bot
+# 6. Inicie o bot
 python run.py
 ```
 
 O assistente de configuração vai pedir:
 1. Sua **Chave de API da Blocky**
 2. (Opcional) **URL do Webhook do Discord** para alertas
+
+#### Passo 3: Parando o Bot
+
+Pressione `Ctrl+C` no terminal para parar o bot graciosamente. Ele vai:
+- Cancelar todas as ordens abertas
+- Salvar métricas em disco
+- Fechar conexões corretamente
 
 ### Opção 2: Configuração Manual
 
@@ -461,6 +713,7 @@ docker run --rm \
   -v $(pwd)/.env:/app/.env \
   -v $(pwd)/config.yaml:/app/config.yaml \
   -p 8080:8080 \
+  -p 8081:8081 \
   blocky-market-maker:prod
 ```
 
@@ -478,11 +731,13 @@ services:
       dockerfile: docker/Dockerfile
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8080:8080"   # Endpoint de saúde
+      - "8081:8081"   # Dashboard
     volumes:
       - ./.env:/app/.env:ro
       - ./config.yaml:/app/config.yaml:ro
-      - ./metrics_data.json:/app/metrics_data.json
+      - ./src/metrics_data.json:/app/src/metrics_data.json
+      - ./logs:/app/logs
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
       interval: 30s
@@ -650,6 +905,35 @@ Eventos WebSocket (tempo real):
 
 ---
 
+## 📊 Dashboard
+
+O bot inclui um **dashboard web em tempo real** para monitorar sua atividade de trading.
+
+### Acessando o Dashboard
+
+Com o bot rodando, abra seu navegador e acesse:
+```
+http://localhost:8081/dashboard
+```
+
+### Recursos do Dashboard
+
+- **📈 Gráficos de Preço em Tempo Real**: Candlesticks com dados ao vivo
+- **📖 Order Book**: Veja compras e vendas atuais
+- **💰 Acompanhamento de P&L**: Monitore seus lucros realizados
+- **🎯 Cards de Estratégia**: Visualize estratégias de precificação ativas
+- **📋 Lista de Mercados**: Navegação rápida entre todos os mercados
+- **🎨 Ferramentas de Desenho**: Adicione linhas de tendência e anotações
+
+### Portas do Dashboard
+
+| Porta | Serviço |
+|-------|---------|
+| 8080 | Endpoint de saúde (`/health`) |
+| 8081 | Dashboard Web (`/dashboard`) |
+
+---
+
 ## 📊 Monitoramento
 
 ### Health Check
@@ -673,7 +957,7 @@ Resposta:
 
 ### Logs
 
-O bot exibe logs coloridos:
+O bot exibe logs coloridos no console e salva em `logs/bot.log`:
 - 🟢 Verde = INFO
 - 🟡 Amarelo = WARNING  
 - 🔴 Vermelho = ERROR
@@ -681,7 +965,59 @@ O bot exibe logs coloridos:
 
 ### Persistência de Métricas
 
-Métricas são salvas em `metrics_data.json` a cada 60 segundos e no shutdown.
+Métricas são salvas em `src/metrics_data.json` a cada 60 segundos e no shutdown.
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+BlockyMarketMaker/
+├── run.py                 # Ponto de entrada - execute isso para iniciar
+├── config.yaml            # Arquivo principal de configuração
+├── requirements.txt       # Dependências Python
+├── .env                   # Suas chaves de API (crie este arquivo)
+│
+├── src/                   # Código fonte
+│   ├── main.py            # Lógica principal do bot
+│   ├── blocky/            # Cliente da API Blocky
+│   ├── dashboard/         # Dashboard web
+│   ├── price_model.py     # Precificação por escassez
+│   ├── spread_calculator.py
+│   ├── trading_helpers.py
+│   └── ...
+│
+├── scripts/               # Scripts utilitários
+│   ├── setup.py           # Assistente de configuração
+│   └── ...
+│
+├── docker/                # Configuração Docker
+│   └── Dockerfile
+│
+├── logs/                  # Arquivos de log (criado automaticamente)
+│   └── bot.log
+│
+├── data/                  # Dados de mercado para análise (criado automaticamente)
+│
+└── tests/                 # Testes unitários
+```
+
+---
+
+## 📝 Entendendo as Mensagens de Log
+
+Aqui está o significado das mensagens de log mais comuns:
+
+| Mensagem | Significado |
+|----------|-------------|
+| `Placed buy order` | Ordem de compra colocada com sucesso |
+| `Placed sell order` | Ordem de venda colocada com sucesso |
+| `Cancelling order (Diff Mismatch)` | Preço mudou, ordem antiga sendo substituída |
+| `Insufficient funds` | Iron insuficiente para colocar ordem |
+| `Circuit breaker OPEN` | Muitos erros na API, pausando requisições |
+| `WS Event: Trade on X` | Alguém negociou no mercado X |
+| `Integrity Check` | Verificação periódica de todas as ordens |
+| `🧪 [DRY-RUN]` | Ação simulada (sem ordem real) |
 
 ---
 
@@ -689,11 +1025,21 @@ Métricas são salvas em `metrics_data.json` a cada 60 segundos e no shutdown.
 
 | Problema | Solução |
 |----------|---------|
+| `BLOCKY_API_KEY not set` | Execute `python scripts/setup.py` ou crie o arquivo `.env` |
 | `502 Bad Gateway` | API da Blocky está fora. Bot vai tentar novamente a cada 5s. |
 | `Circuit breaker OPEN` | Muitos erros na API. Vai recuperar automaticamente em 30s. |
 | `Insufficient funds` | Adicione mais Iron na carteira ou reduza `target_value`. |
 | `Rate limit reached` | Bot vai auto-throttle. Verifique configurações de `rate_limit`. |
 | Nenhuma ordem colocada | Verifique config `enabled_markets`/`disabled_markets`. |
+| Dashboard não carrega | Certifique-se que a porta 8081 está livre. Acesse `http://localhost:8081/dashboard` |
+| `ModuleNotFoundError` | Ative o ambiente virtual: `source venv/bin/activate` |
+
+### Antes da Sua Primeira Execução
+
+1. ✅ Certifique-se de ter **Iron na sua carteira Blocky**
+2. ✅ Comece com `dry_run: true` para testar sem dinheiro real
+3. ✅ Use **um único mercado** primeiro: `enabled_markets: [diam_iron]`
+4. ✅ Confira o dashboard para ver o que o bot está fazendo
 
 ### Testando em Dry Run
 

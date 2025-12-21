@@ -129,7 +129,7 @@ class PriceModel:
         total_blocks_area = width * depth
         return int(total_blocks_area / 256)
 
-    def get_circulating_supply(self) -> Dict[str, int]:
+    async def get_circulating_supply(self) -> Dict[str, int]:
         """Fetches and caches circulating supply metrics from API."""
         import time
         current_time = time.time()
@@ -147,16 +147,30 @@ class PriceModel:
             self._using_stale_cache = False
             
         try:
-            # Use shared client optimized connection pool
-            data = self.client.get_supply_metrics(time_range="24h", interval="1h")
+            # Use shared client optimized connection pool (Async)
+            data = await self.client.get_supply_metrics()
             
-            if not data or not isinstance(data, list):
+            # Accept empty dict as valid "no data" (API 404 handled in client)
+            if data is None: 
+                # Only treat None as connection failure
                 self._consecutive_failures += 1
-                if self._consecutive_failures >= 3:
+                if self._consecutive_failures >= 3 and self._consecutive_failures % 50 == 0:
+                    logger.warning(f"⚠️ Metrics API returned None {self._consecutive_failures} times. Using cached/default supplies.")
+                return self._metrics_cache or {}
+            
+            # Handle empty dict (404 response from client)
+            if isinstance(data, dict) and not data:
+                self._consecutive_failures = 0
+                return self._metrics_cache or {}
+            
+            # Validate we have a non-empty list
+            if not isinstance(data, list) or len(data) == 0:
+                self._consecutive_failures += 1
+                if self._consecutive_failures >= 3 and self._consecutive_failures % 50 == 0:
                     logger.error(f"🚨 Metrics API returned invalid data {self._consecutive_failures} times consecutively!")
                 return self._metrics_cache or {}
 
-            # Get latest data point
+            # Get latest data point from list
             latest = data[-1]
             
             supplies = {}
@@ -176,9 +190,9 @@ class PriceModel:
             return supplies
         except Exception as e:
             self._consecutive_failures += 1
-            if self._consecutive_failures >= 3:
+            if self._consecutive_failures >= 3 and self._consecutive_failures % 50 == 0:
                 logger.error(f"🚨 Metrics API failing consistently: {e} (failure #{self._consecutive_failures})")
-            else:
+            elif self._consecutive_failures < 3:
                 logger.warning(f"Error fetching metrics: {e}")
             return self._metrics_cache or {} # Return stale cache if available
     
@@ -186,9 +200,9 @@ class PriceModel:
         """Returns True if metrics data is fresh and reliable."""
         return not self._using_stale_cache and self._consecutive_failures < 3
 
-    def calculate_fair_price(self, market: str) -> float:
+    async def calculate_fair_price(self, market: str) -> float:
         """Calculate fair price based on scarcity model."""
-        supplies = self.get_circulating_supply()
+        supplies = await self.get_circulating_supply()
         circulating = supplies.get(market, 0)
         total_possible = self.world_supply.get(market, 1)
         
