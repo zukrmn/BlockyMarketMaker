@@ -1082,20 +1082,83 @@ MIT License - Feel free to use and modify.
 
 ## Building the Windows Executable
 
-For developers who want to build the `.exe` themselves:
+For developers who want to build the `.exe` themselves.
+
+### Prerequisites
+
+1. **Python 3.11+** installed
+   - Download from [python.org](https://www.python.org/downloads/)
+   - During installation, check **"Add Python to PATH"**
+   - Verify: `python --version`
+
+2. **Git** installed
+   - Download from [git-scm.com](https://git-scm.com/downloads)
+
+### Build Steps
 
 ```bash
-# Install PyInstaller
+# 1. Clone the repository
+git clone https://github.com/zukrmn/BlockyMarketMaker.git
+cd BlockyMarketMaker
+
+# 2. Install project dependencies
+pip install -r requirements.txt
+
+# 3. Install PyInstaller
 pip install pyinstaller
 
-# Build (Windows)
+# 4. Build the executable
 build_exe.bat
+```
 
-# Or manually:
+Or build manually:
+```bash
 pyinstaller blocky.spec --clean
 ```
 
-The executable will be created at `dist/BlockyMarketMaker.exe`.
+### Build Output
+
+- **Executable**: `dist/BlockyMarketMaker.exe`
+- **Expected size**: ~50-80MB
+- **Build time**: 1-3 minutes
+
+### Testing the Build
+
+1. Create a new empty folder (e.g., `C:\BlockyTest\`)
+2. Copy `dist/BlockyMarketMaker.exe` to this folder
+3. Copy `config.yaml` to the same folder (as template)
+4. Double-click `BlockyMarketMaker.exe`
+5. The setup wizard should open
+
+### Distributing
+
+To share with other users, they only need:
+- `BlockyMarketMaker.exe`
+- `config.yaml` (optional, will use defaults if missing)
+
+Users do NOT need Python installed.
+
+### Troubleshooting Build Issues
+
+| Problem | Solution |
+|---------|----------|
+| `python not found` | Reinstall Python with "Add to PATH" checked |
+| `pip not found` | Run `python -m pip install --upgrade pip` |
+| `ModuleNotFoundError` during build | Run `pip install <module_name>` and rebuild |
+| Build succeeds but exe crashes | Check for missing hidden imports in `blocky.spec` |
+| Antivirus blocks/deletes exe | Add exception for `dist/` folder (false positive) |
+| Windows SmartScreen warning | Click "More info" → "Run anyway" |
+| Exe size is 200MB+ | Something wrong with spec, rebuild with `--clean` |
+
+### Adding an Icon (Optional)
+
+1. Create or download a `.ico` file
+2. Save as `img/icon.ico`
+3. Uncomment the icon line in `blocky.spec`:
+   ```python
+   icon='img/icon.ico',
+   ```
+4. Rebuild
 
 ## Contributing
 
