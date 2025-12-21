@@ -95,7 +95,23 @@ When someone sells you a diamond for 49 and later someone buys it for 51, you pr
 
 ## Quick Start
 
-### Option 1: Run Locally (Recommended for First Time)
+### Option 1: Windows Executable (Easiest)
+
+For Windows users who prefer not to install Python:
+
+1. Download `BlockyMarketMaker.exe` from the [Releases](https://github.com/zukrmn/BlockyMarketMaker/releases) page
+2. Double-click to run
+3. Complete the setup wizard:
+   - Enter your Blocky API key
+   - Configure trading settings
+   - Select markets
+4. The bot will start automatically
+
+The setup wizard explains each setting and helps you configure unique values to avoid conflicts with other users.
+
+---
+
+### Option 2: Run Locally with Python
 
 #### Step 1: Install Python
 
@@ -153,7 +169,7 @@ Press `Ctrl+C` to stop the bot. It will:
 - Save metrics to disk
 - Close connections properly
 
-### Option 2: Manual Configuration
+### Option 3: Manual Configuration
 
 Create a `.env` file:
 
@@ -614,7 +630,23 @@ Quando alguém te vende um diamante por 49 e depois alguém compra por 51, você
 
 ## Início Rápido
 
-### Opção 1: Rodar Localmente (Recomendado)
+### Opção 1: Executável Windows (Mais Fácil)
+
+Para usuários Windows que preferem não instalar Python:
+
+1. Baixe `BlockyMarketMaker.exe` da página de [Releases](https://github.com/zukrmn/BlockyMarketMaker/releases)
+2. Dê duplo clique para executar
+3. Complete o assistente de configuração:
+   - Digite sua chave API da Blocky
+   - Configure parâmetros de trading
+   - Selecione mercados
+4. O bot iniciará automaticamente
+
+O assistente explica cada configuração e ajuda a definir valores únicos para evitar conflitos com outros usuários.
+
+---
+
+### Opção 2: Rodar Localmente com Python
 
 #### Passo 1: Instalar Python
 
@@ -672,7 +704,7 @@ Pressione `Ctrl+C` para parar. O bot irá:
 - Salvar métricas
 - Fechar conexões
 
-### Opção 2: Configuração Manual
+### Opção 3: Configuração Manual
 
 Crie um arquivo `.env`:
 
@@ -1047,6 +1079,23 @@ Logs mostram `[DRY-RUN]` para ações simuladas.
 ## License
 
 MIT License - Feel free to use and modify.
+
+## Building the Windows Executable
+
+For developers who want to build the `.exe` themselves:
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build (Windows)
+build_exe.bat
+
+# Or manually:
+pyinstaller blocky.spec --clean
+```
+
+The executable will be created at `dist/BlockyMarketMaker.exe`.
 
 ## Contributing
 
