@@ -128,72 +128,161 @@ class MarketMaker:
         self.spread_calculator = SpreadCalculator(self.client, spread_config)
         self.recorder = DataRecorder() # Initialize Recorder
         
+        # Orderbook Cache: Updated via WebSocket, seeded via HTTP on startup
+        # Key: market, Value: {asks: [...], bids: [...], last_update: timestamp}
+        self.orderbook_cache: Dict[str, Dict[str, Any]] = {}
+        
         if spread_config.enabled:
             logger.info("📊 Dynamic spread calculation enabled")
 
     async def _on_event_update(self, data: Dict[str, Any]) -> None:
-        """Callback for real-time events (Trade or Orderbook)."""
+        """Callback for real-time events (Trade or Orderbook).
+        
+        Following API developer recommendation:
+        - Use HTTP for initial state (startup)
+        - Use WebSocket for real-time updates (here)
+        """
         try:
-            # Data: {'channel': 'market:transactions', ...} OR {'channel': 'market:orderbook', ...}
             channel = data.get("channel", "")
-            if ":" in channel:
-                market = channel.split(":")[0]
-                # Log only on transaction to reduce noise, or debug for orderbook
-                if "transactions" in channel:
-                     logger.info(f"WS Event: Trade on {market}")
-                     # Parse trade data from payload
-                     payload = data.get("payload", {})
-                     # Payload usually mimics the trade object: {price, quantity, side}
-                     # We need to verify the exact structure in logs if this fails, but standard is root or nested.
-                     # Assuming standard Blocky WS format based on other integrations.
-                     price = float(payload.get("price", 0))
-                     quantity = float(payload.get("quantity", 0) or payload.get("amount", 0))
-                     side = payload.get("side", "buy")
-                     
-                     if price > 0:
-                        self.metrics.record_public_trade(market, price, side, quantity)
-                        # Log trade using recorder
-                        await self.recorder.log_trade(market, payload)
+            if ":" not in channel:
+                return
                 
-                # Fetch supplies cache (safe to use stale for 60s)
-                # We do NOT await get_circulating_supply here if it does network call, 
-                # but it uses cache logic. 
-                # Fetch supplies cache (safe to use stale for 60s)
-                # We do NOT await get_circulating_supply here if it does network call, 
-                # but it uses cache logic. 
-                supplies = await self.price_model.get_circulating_supply()
+            market = channel.split(":")[0]
+            payload = data.get("payload", {})
+            
+            # Handle Transactions (Trades)
+            if "transactions" in channel:
+                logger.info(f"WS Event: Trade on {market}")
+                price = float(payload.get("price", 0))
+                quantity = float(payload.get("quantity", 0) or payload.get("amount", 0))
+                side = payload.get("side", "buy")
                 
-                # Fetch Open Orders for this market
-                # Note: Blocky API ignores filter params, so we filter client-side
-                my_orders = []
-                try:
-                    response = await self.client.get_orders( 
-                        statuses=["open"], 
-                        markets=[market]
-                    )
-                    if response.get("success"):
-                        # Client-side filtering: API ignores status and market filters
-                        for order in response.get("orders", []):
-                            order_market = order.get("market", "")
-                            order_status = order.get("status", "").lower()
-                            if order_market == market and order_status in ["open", "pending", "new"]:
-                                my_orders.append(order)
-                except Exception as e:
-                    logger.error(f"{market}: Failed to fetch open orders in WS handler: {e}")
-                    return # Skip processing if we can't see our orders (safety)
-
-                # Fetch Ticker (or use data if possible, but safer to fetch fresh ticker from API to be sure)
-                # Relying on _process_market to fetch ticker if None passed?
-                # _process_market fetches individual ticker if None passed.
-                # To be faster, we could parse the orderbook update? 
-                # Orderbook update might be partial. Safer to fetch snapshot or ticker.
-                # Let's pass None and let _process_market fetch ticker.
-                
-                await self._process_market(market, supplies, ticker=None, open_orders=my_orders)
+                if price > 0:
+                    self.metrics.record_public_trade(market, price, side, quantity)
+                    await self.recorder.log_trade(market, payload)
+            
+            # Handle Orderbook Updates - Cache the data!
+            elif "orderbook" in channel:
+                # Update local cache with WebSocket data
+                # Payload should contain orderbook structure
+                orderbook = payload.get("orderbook", payload)
+                if orderbook:
+                    import time
+                    self.orderbook_cache[market] = {
+                        "orderbook": orderbook,
+                        "last_update": time.time()
+                    }
+                    logger.debug(f"WS: Orderbook cache updated for {market}")
+            
+            # Process market update (for both event types)
+            # Use cached data to build ticker instead of HTTP call
+            ticker = self._get_ticker_from_cache(market)
+            
+            # Get supplies from cache
+            supplies = await self.price_model.get_circulating_supply()
+            
+            # Fetch my open orders (still need HTTP for this - it's MY orders, not public)
+            my_orders = []
+            try:
+                response = await self.client.get_orders( 
+                    statuses=["open"], 
+                    markets=[market]
+                )
+                if response.get("success"):
+                    for order in response.get("orders", []):
+                        order_market = order.get("market", "")
+                        order_status = order.get("status", "").lower()
+                        if order_market == market and order_status in ["open", "pending", "new"]:
+                            my_orders.append(order)
+            except Exception as e:
+                logger.error(f"{market}: Failed to fetch open orders in WS handler: {e}")
+                return
+            
+            await self._process_market(market, supplies, ticker=ticker, open_orders=my_orders)
                 
         except Exception as e:
             logger.error(f"WS Handler Error: {e}")
+    
+    def _get_ticker_from_cache(self, market: str) -> Optional[Dict[str, Any]]:
+        """Derive ticker data from cached orderbook.
+        
+        Builds a ticker-like structure from orderbook cache to avoid HTTP calls.
+        """
+        cache = self.orderbook_cache.get(market)
+        if not cache:
+            return None
+        
+        orderbook = cache.get("orderbook", {})
+        asks = orderbook.get("asks", {})
+        bids = orderbook.get("bids", {})
+        
+        # Extract best ask/bid prices
+        ask_prices = asks.get("price", [])
+        bid_prices = bids.get("price", [])
+        
+        best_ask = float(ask_prices[0]) if ask_prices else 0
+        best_bid = float(bid_prices[0]) if bid_prices else 0
+        
+        if best_ask == 0 and best_bid == 0:
+            return None
+        
+        # Calculate mid price
+        if best_ask > 0 and best_bid > 0:
+            mid = (best_ask + best_bid) / 2
+            last = mid  # Estimate last trade as mid
+        elif best_ask > 0:
+            mid = best_ask
+            last = best_ask
+        else:
+            mid = best_bid
+            last = best_bid
+        
+        return {
+            "market": market,
+            "best_ask": best_ask,
+            "best_bid": best_bid,
+            "last": last,
+            "mid": mid,
+            "from_cache": True  # Flag indicating this is from cache
+        }
 
+    async def _seed_orderbook_cache(self) -> None:
+        """Seed orderbook cache via HTTP on startup.
+        
+        As recommended by API developer:
+        - Use HTTP for initial state (here)
+        - Then WebSocket for real-time updates
+        """
+        import time
+        from aiohttp import ClientSession
+        
+        async with ClientSession() as session:
+            tasks = []
+            for market in self.markets:
+                tasks.append(self._fetch_single_orderbook(session, market))
+            
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            success_count = sum(1 for r in results if r is True)
+            logger.info(f"Orderbook cache seeded: {success_count}/{len(self.markets)} markets")
+    
+    async def _fetch_single_orderbook(self, session, market: str) -> bool:
+        """Fetch a single orderbook and cache it."""
+        import time
+        url = f"{self.endpoint}/markets/{market}/orderbook"
+        try:
+            async with session.get(url, timeout=5) as response:
+                if response.status == 200:
+                    data = await response.json(content_type=None)
+                    if data.get("success"):
+                        self.orderbook_cache[market] = {
+                            "orderbook": data.get("orderbook", {}),
+                            "last_update": time.time()
+                        }
+                        return True
+        except Exception as e:
+            logger.debug(f"Failed to fetch orderbook for {market}: {e}")
+        return False
 
     async def _fetch_markets(self) -> List[str]:
         """Fetches available markets from the API and applies config filters."""
@@ -807,6 +896,11 @@ class MarketMaker:
                 logger.warning(f"Health endpoint failed to start: {e}")
 
         try:
+            # Seed orderbook cache via HTTP (as recommended by API developer)
+            # After this, WebSocket will keep the cache updated in real-time
+            logger.info("Seeding orderbook cache via HTTP...")
+            await self._seed_orderbook_cache()
+            
             # Seed orders once
             logger.info("Seeding initial orders...")
             await self.place_orders_parallel()
