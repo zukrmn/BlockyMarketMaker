@@ -26,7 +26,9 @@ API_BASE_URL = "https://craft.blocky.com.br/api/v1"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
-IMG_DIR = os.path.join(os.path.dirname(BASE_DIR), 'img')
+# img folder is at project root: /workspaces/BlockyMarketMaker/img
+PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
+IMG_DIR = os.path.join(PROJECT_ROOT, 'img')
 
 
 class TradingDashboard:
