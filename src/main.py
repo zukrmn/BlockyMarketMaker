@@ -14,6 +14,7 @@ from metrics import MetricsTracker
 from alerts import AlertManager, AlertLevel
 from config import get_config
 from health import HealthServer
+from capital_allocator import CapitalAllocator, AllocationConfig
 from trading_helpers import (
     calculate_quotes,
     apply_pennying,
@@ -132,8 +133,23 @@ class MarketMaker:
         # Key: market, Value: {asks: [...], bids: [...], last_update: timestamp}
         self.orderbook_cache: Dict[str, Dict[str, Any]] = {}
         
+        # Dynamic Capital Allocator
+        alloc_config = AllocationConfig(
+            enabled=config.capital_allocation.enabled,
+            base_reserve_ratio=config.capital_allocation.base_reserve_ratio,
+            max_reserve_ratio=config.capital_allocation.max_reserve_ratio,
+            min_order_value=config.capital_allocation.min_order_value,
+            priority_markets=config.capital_allocation.priority_markets,
+            priority_boost=config.capital_allocation.priority_boost,
+        )
+        self.capital_allocator = CapitalAllocator(alloc_config)
+        self.dynamic_target_value: float = TARGET_VALUE  # Will be updated dynamically
+        
         if spread_config.enabled:
             logger.info("📊 Dynamic spread calculation enabled")
+        
+        if alloc_config.enabled:
+            logger.info("💰 Dynamic capital allocation enabled")
 
     async def _on_event_update(self, data: Dict[str, Any]) -> None:
         """Callback for real-time events (Trade or Orderbook).
@@ -569,12 +585,14 @@ class MarketMaker:
                 else:
                     quote_balance = cap_source.get(quote.lower(), 0) + locked_quote
                 
-                # Target Value Liquidity Strategy (using config value)
+                # Target Value Liquidity Strategy (using dynamic allocation)
                 check_price = buy_price if buy_price > 0 else (sell_price if sell_price > 0 else 0)
                 
                 # DYNAMIC SIZING BASED ON CAPITAL
-                allocated_value = TARGET_VALUE
-                if quote == "iron" and quote_balance < TARGET_VALUE:
+                # Use dynamically calculated target_value based on Iron inventory
+                target_value = self.dynamic_target_value
+                allocated_value = target_value
+                if quote == "iron" and quote_balance < target_value:
                      allocated_value = quote_balance
                 
                 # Min Notional Check (0.05 buffer)
@@ -741,6 +759,24 @@ class MarketMaker:
         try:
             # Update wallets once
             await self._update_wallets()
+            
+            # Calculate dynamic target_value based on total Iron inventory
+            iron_balance = self.wallets.get("iron", 0)
+            num_markets = len(self.markets)
+            
+            if config.capital_allocation.enabled and iron_balance > 0 and num_markets > 0:
+                # Calculate allocation using portfolio management principles
+                base_alloc, reserve, deployable = self.capital_allocator.calculate_allocation(
+                    total_capital=iron_balance,
+                    num_markets=num_markets
+                )
+                self.dynamic_target_value = base_alloc
+                
+                # Log allocation once per cycle
+                self.capital_allocator.log_allocation(iron_balance, num_markets)
+            else:
+                # Fallback to static target_value from config
+                self.dynamic_target_value = TARGET_VALUE
             
             # Initialize local capital tracker for this batch
             tracker = self.wallets.copy()

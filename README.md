@@ -54,6 +54,7 @@ When someone sells you a diamond for 49 and later someone buys it for 51, you pr
 | Feature | Description |
 |---------|-------------|
 | Dynamic Spread | Automatically adjusts spreads based on volatility and inventory |
+| Dynamic Capital Allocation | Automatically calculates order sizes based on your Iron inventory |
 | Smart Order Diffing | Only updates orders when necessary (reduces API calls) |
 | Pennying Strategy | Automatically beats competitors by 0.01 while maintaining margins |
 | Scarcity-Based Pricing | Prices items based on remaining world supply |
@@ -64,6 +65,7 @@ When someone sells you a diamond for 49 and later someone buys it for 51, you pr
 | Health Endpoint | HTTP `/health` for monitoring systems |
 | Dry Run Mode | Test strategies without real orders |
 | Metrics & P&L | Track trading performance |
+
 
 ---
 
@@ -300,6 +302,33 @@ dynamic_spread:
 - `spread = base_spread + volatility_adj + inventory_adj`
 - High volatility → wider spreads
 - Overstocked → wider buy spread, tighter sell spread
+
+### Dynamic Capital Allocation
+
+Automatically calculates order sizes based on your Iron inventory:
+
+```yaml
+capital_allocation:
+  enabled: true                   # Enable dynamic allocation
+  base_reserve_ratio: 0.10        # Minimum 10% reserve
+  max_reserve_ratio: 0.30         # Maximum 30% reserve
+  min_order_value: 0.10           # Minimum order value
+  priority_markets: [diam_iron, gold_iron, slme_iron]  # Higher allocation
+  priority_boost: 1.5             # 50% more for priority markets
+```
+
+**Formula:**
+```
+Reserve Ratio = 10% + (number_of_markets / 100)
+Reserve = Total Iron × Reserve Ratio
+Per Market = (Total Iron - Reserve) / number_of_markets
+```
+
+**Example with 500 Iron and 37 markets:**
+- Reserve Ratio: 10% + 37% = 30% (capped)
+- Reserve: 150 Iron (kept safe)
+- Deployable: 350 Iron
+- Per Market: ~9.5 Iron
 
 ### Price Model
 
@@ -671,6 +700,7 @@ Quando alguém te vende um diamante por 49 e depois alguém compra por 51, você
 | Recurso | Descrição |
 |---------|-----------|
 | Spread Dinâmico | Ajusta spreads baseado em volatilidade e inventário |
+| Alocação Dinâmica de Capital | Calcula tamanho das ordens baseado no seu inventário de Iron |
 | Smart Order Diffing | Atualiza ordens apenas quando necessário |
 | Estratégia de Pennying | Supera concorrentes por 0.01 mantendo margem |
 | Precificação por Escassez | Preços baseados na oferta restante |
@@ -917,6 +947,32 @@ dynamic_spread:
 - `spread = base + volatilidade + inventário`
 - Alta volatilidade → spreads maiores
 - Excesso de estoque → spread de compra maior
+
+### Alocação Dinâmica de Capital
+
+Calcula automaticamente o tamanho das ordens baseado no seu Iron:
+
+```yaml
+capital_allocation:
+  enabled: true                   # Habilitar alocação dinâmica
+  base_reserve_ratio: 0.10        # Mínimo 10% de reserva
+  max_reserve_ratio: 0.30         # Máximo 30% de reserva
+  min_order_value: 0.10           # Valor mínimo de ordem
+  priority_markets: [diam_iron, gold_iron, slme_iron]  # Maior alocação
+  priority_boost: 1.5             # 50% a mais para mercados prioritários
+```
+
+**Fórmula:**
+```
+Reserva = 10% + (número_de_mercados / 100)
+Reserva em Iron = Total × Reserva
+Por Mercado = (Total - Reserva) / número_de_mercados
+```
+
+**Exemplo com 500 Iron e 37 mercados:**
+- Reserva: 30% (cap) = 150 Iron guardados
+- Disponível: 350 Iron
+- Por Mercado: ~9.5 Iron
 
 ### Modelo de Preço
 
