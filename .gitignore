@@ -4,7 +4,7 @@
 .env.*.local
 
 # Data files
-metrics_data.json
+# metrics_data.json
 data/
 
 # Python cache

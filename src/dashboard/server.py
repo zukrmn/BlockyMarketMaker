@@ -131,18 +131,26 @@ class TradingDashboard:
             "close": ["50.25000000", ...]
         }
         """
-        # Map timeframe string to nanoseconds
+        # Map timeframe string to nanoseconds (matching BlockyCRAFT interface)
         tf_map = {
+            # Minutes
             "1m": 60000000000,
+            "3m": 180000000000,
             "5m": 300000000000,
-            "15m": 900000000000,
-            "1H": 3600000000000,
-            "4H": 14400000000000,
+            "30m": 1800000000000,
+            # Hours
+            "2H": 7200000000000,
+            "6H": 21600000000000,
+            "8H": 28800000000000,
+            "12H": 43200000000000,
+            # Days/Weeks/Months
             "1D": 86400000000000,
-            "1W": 604800000000000
+            "3D": 259200000000000,
+            "1W": 604800000000000,
+            "1M": 2592000000000000  # ~30 days
         }
         
-        tf_ns = tf_map.get(timeframe, 14400000000000)  # Default to 4H
+        tf_ns = tf_map.get(timeframe, 3600000000000)  # Default to 1H
         market_symbol = market.replace('-', '_')
         url = f"{API_BASE_URL}/markets/{market_symbol}/ohlcv?timeframe={tf_ns}"
         
@@ -188,9 +196,8 @@ class TradingDashboard:
                     candles = []
                     num_candles = len(timestamps)
                     
-                    # Get last N candles
-                    start_idx = max(0, num_candles - count)
-                    for i in range(start_idx, num_candles):
+                    # Return ALL candles from API (no limit)
+                    for i in range(num_candles):
                         candles.append({
                             "time": int(timestamps[i]) // 1000000000,  # ns to seconds
                             "open": float(opens[i]) if i < len(opens) else 0,
@@ -315,7 +322,7 @@ class TradingDashboard:
              
         # Fallback if empty (should not happen after first tick)
         if not strat_data:
-             return '<div class="strategy-card">Waiting for data...</div>'
+             return '<div class="strategy-card" data-i18n="waiting_data">Waiting for data...</div>'
 
         # Sort order
         strategies = ["scarcity", "ticker", "vwap", "composite"]
@@ -329,9 +336,9 @@ class TradingDashboard:
             
             html += f'''
             <div class="strategy-card {is_active}" onclick="showStrategyInfo('{s}')" style="cursor: pointer;">
-                <div class="strategy-name">{s.upper()}</div>
+                <div class="strategy-name" data-i18n="{s}_title">{s.upper()}</div>
                 <div class="strategy-price">{price:.4f}</div>
-                <div class="strategy-confidence">Confiança: {conf}%</div>
+                <div class="strategy-confidence"><span data-i18n="confidence">Confidence</span>: {conf}%</div>
             </div>'''
         
         return html
@@ -476,7 +483,7 @@ class TradingDashboard:
         strategy_lines = []
         if strat_prices:
             for s, d in strat_prices.items():
-                if d.get('active'): continue # Don't plot active twice? Or plot all.
+                # Plot ALL strategies (removed filter that skipped active)
                 color = self.STRATEGY_COLORS.get(s, "#ffffff")
                 strategy_lines.append({"name": s.upper(), "price": d.get('price', 0), "color": color})
         else:
@@ -516,14 +523,14 @@ class TradingDashboard:
     async def _api_candles(self, request: web.Request) -> web.Response:
         """API endpoint for candle data."""
         market = request.match_info.get('market', 'diam_iron')
-        timeframe = request.query.get('tf', '4H')
+        timeframe = request.query.get('tf', '5m')
         
-        # Try to get real data from API first
+        # Get real data from API only (no mock fallback!)
         candles = await self._fetch_candles_from_api(market, timeframe)
         
-        # Fallback to local data (collector or mock)
+        # Return empty array if no data - no mock data!
         if not candles:
-            candles = self._get_candles(market, timeframe)
+            candles = []
         
         return web.json_response(candles)
 

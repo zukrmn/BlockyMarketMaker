@@ -77,6 +77,73 @@
         line-height: 1.6;
         color: #ccc;
     }
+
+    /* Language Selector Styles */
+    .language-selector {
+        position: relative;
+        display: inline-block;
+        margin-right: 16px;
+    }
+
+    .lang-btn {
+        background: #2a2a2a;
+        border: 1px solid #444;
+        color: #e0e0e0;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover {
+        background: #333;
+        border-color: var(--primary);
+    }
+
+    .lang-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 100;
+        min-width: 120px;
+        overflow: hidden;
+    }
+
+    .lang-dropdown.show {
+        display: block;
+    }
+
+    .lang-option {
+        padding: 10px 16px;
+        cursor: pointer;
+        color: #e0e0e0;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .lang-option:hover {
+        background: #333;
+    }
+
+    .lang-option.active {
+        background: var(--primary);
+        color: #000;
+    }
+
+    .lang-flag {
+        font-size: 18px;
+    }
 </style>
 </head>
 
@@ -105,7 +172,7 @@
             </div>
             <div class="header-stats">
                 <div class="stat">
-                    <div class="stat-label">P&L Realizado</div>
+                    <div class="stat-label" data-i18n="realized_pnl">P&L Realizado</div>
                     <div class="stat-value {{pnl_class}}">{{realized_pnl}}</div>
                 </div>
                 <div class="stat">
@@ -113,21 +180,39 @@
                     <div class="stat-value">{{total_trades}}</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-label">Ordens</div>
+                    <div class="stat-label" data-i18n="orders">Ordens</div>
                     <div class="stat-value">{{orders_placed}}</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-label">Mercados</div>
+                    <div class="stat-label" data-i18n="markets">Mercados</div>
                     <div class="stat-value">{{market_count}}</div>
+                </div>
+                <!-- Language Selector -->
+                <div class="language-selector">
+                    <button class="lang-btn" onclick="toggleLangDropdown()">
+                        <span class="lang-flag" id="currentFlag">🇧🇷</span>
+                        <span id="currentLang">Português</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-option" onclick="setLanguage('pt')">
+                            <span class="lang-flag">🇧🇷</span>
+                            <span>Português</span>
+                        </div>
+                        <div class="lang-option" onclick="setLanguage('en')">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span>English</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar - Market List -->
         <div class="sidebar">
-            <div class="sidebar-header">Mercados Ativos</div>
+            <div class="sidebar-header" data-i18n="active_markets">Mercados Ativos</div>
             <div class="search-box">
-                <input type="text" class="search-input" id="marketSearch"
+                <input type="text" class="search-input" id="marketSearch" data-i18n-placeholder="search_market"
                     placeholder="Buscar mercado... (ex: STON/IRON)" oninput="filterMarkets()">
             </div>
             <div class="market-list" id="marketList">
@@ -141,12 +226,17 @@
                 <div class="chart-title">{{ selected_market_display }}</div>
                 <div class="chart-actions" id="timeframeButtons">
                     <button class="chart-btn" data-tf="1m">1m</button>
-                    <button class="chart-btn" data-tf="5m">5m</button>
-                    <button class="chart-btn" data-tf="15m">15m</button>
-                    <button class="chart-btn" data-tf="1H">1H</button>
-                    <button class="chart-btn active" data-tf="4H">4H</button>
+                    <button class="chart-btn" data-tf="3m">3m</button>
+                    <button class="chart-btn active" data-tf="5m">5m</button>
+                    <button class="chart-btn" data-tf="30m">30m</button>
+                    <button class="chart-btn" data-tf="2H">2H</button>
+                    <button class="chart-btn" data-tf="6H">6H</button>
+                    <button class="chart-btn" data-tf="8H">8H</button>
+                    <button class="chart-btn" data-tf="12H">12H</button>
                     <button class="chart-btn" data-tf="1D">1D</button>
+                    <button class="chart-btn" data-tf="3D">3D</button>
                     <button class="chart-btn" data-tf="1W">1W</button>
+                    <button class="chart-btn" data-tf="1M">1M</button>
                 </div>
             </div>
             <div class="chart-container" id="chartContainer">
@@ -186,21 +276,21 @@
         <!-- Right Panel -->
         <div class="right-panel">
             <div class="panel-section">
-                <div class="panel-title">Order Book</div>
+                <div class="panel-title" data-i18n="order_book">Order Book</div>
                 <div class="orderbook">
                     {{ orderbook | safe }}
                 </div>
             </div>
 
             <div class="panel-section">
-                <div class="panel-title">Bot Orders</div>
+                <div class="panel-title" data-i18n="bot_orders">Bot Orders</div>
                 <div class="metrics-grid">
                     <div class="metric">
-                        <div class="metric-label">BUY Order</div>
+                        <div class="metric-label" data-i18n="buy_order">BUY Order</div>
                         <div class="metric-value" style="color:var(--green)">{{buy_order}}</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">SELL Order</div>
+                        <div class="metric-label" data-i18n="sell_order">SELL Order</div>
                         <div class="metric-value" style="color:var(--red)">{{sell_order}}</div>
                     </div>
                     <div class="metric">
@@ -208,22 +298,22 @@
                         <div class="metric-value">{{spread}}</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">Posição</div>
+                        <div class="metric-label" data-i18n="position">Posição</div>
                         <div class="metric-value">{{position}}</div>
                     </div>
                 </div>
             </div>
 
             <div class="panel-section" style="flex:1; overflow:hidden;">
-                <div class="panel-title">Trade Log</div>
+                <div class="panel-title" data-i18n="trade_log">Trade Log</div>
                 <div class="trade-log">
                     {{ trade_log | safe }}
                 </div>
             </div>
 
             <div class="footer">
-                <span>Última atualização: {{timestamp}}</span>
-                <span>Auto-refresh desativado</span>
+                <span><span data-i18n="last_update">Última atualização</span>: {{timestamp}}</span>
+                <span data-i18n="auto_refresh_disabled">Auto-refresh desativado</span>
             </div>
         </div>
     </div>
@@ -305,42 +395,187 @@
             wickDownColor: '#ff0000',
         });
 
-        // Load candle data
-        const candleData = {{ candle_data | safe }};
-        candleSeries.setData(candleData);
+        // Load candle data from server (initial load)
+        const serverCandleData = {{ candle_data | safe }};
 
-        // Add strategy price lines
+        // Strategy data from server
         const strategies = {{ strategy_lines | safe }};
-        strategies.forEach(s => {
-            candleSeries.createPriceLine({
-                price: s.price,
-                color: s.color,
-                lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
+        const bidPrice = {{ bid_price }};
+        const askPrice = {{ ask_price }};
+
+        // Get current market from URL path (e.g., /dashboard/coal_iron -> coal_iron)
+        const pathParts = window.location.pathname.split('/');
+        const currentMarket = pathParts[pathParts.length - 1] || 'diam_iron';
+        console.log('Current market:', currentMarket);
+
+        // Timeframe configurations (matching BlockyCRAFT interface)
+        const timeframes = ['1m', '3m', '5m', '30m', '2H', '6H', '8H', '12H', '1D', '3D', '1W', '1M'];
+        let currentTimeframe = '5m';
+        let isLoadingCandles = false;
+
+        // Fetch real candles from API
+        async function fetchRealCandles(market, timeframe) {
+            if (isLoadingCandles) return null;
+            isLoadingCandles = true;
+
+            try {
+                const url = `/api/candles/${market}?tf=${timeframe}`;
+                console.log('Fetching candles from:', url);
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    console.error('Failed to fetch candles:', response.status);
+                    return null;
+                }
+
+                const candles = await response.json();
+                console.log(`Loaded ${candles.length} real candles for ${market} (${timeframe})`);
+                return candles;
+            } catch (error) {
+                console.error('Error fetching candles:', error);
+                return null;
+            } finally {
+                isLoadingCandles = false;
+            }
+        }
+
+        // Update chart with new candle data
+        async function updateChartCandles(timeframe) {
+            const candles = await fetchRealCandles(currentMarket, timeframe);
+
+            if (candles && candles.length > 0) {
+                candleSeries.setData(candles);
+                console.log('Chart updated with real data');
+            } else {
+                // No data available - clear the chart (no mock data!)
+                console.warn('No data available for this timeframe');
+                candleSeries.setData([]);  // Clear the chart
+            }
+        }
+
+        // =============================================
+        // PRICE LINES MANAGEMENT - Always Visible
+        // =============================================
+
+        // Persistent line references (created once, updated as needed)
+        let strategyLines = {};  // { name: lineReference }
+        let bidLine = null;
+        let askLine = null;
+        let linesInitialized = false;
+
+        // Validate price value
+        function isValidPrice(price) {
+            return typeof price === 'number' && !isNaN(price) && isFinite(price) && price > 0;
+        }
+
+        // Get default price if invalid
+        function getValidPrice(price, defaultPrice) {
+            return isValidPrice(price) ? price : defaultPrice;
+        }
+
+        // Create all price lines (called once on init)
+        function initializePriceLines() {
+            if (linesInitialized) return;
+
+            const defaultMid = serverCandleData[serverCandleData.length - 1]?.close || 50;
+
+            // Create strategy lines
+            const strategyColors = {
+                'SCARCITY': '#ff00ff',
+                'TICKER': '#00aaff',
+                'VWAP': '#00ff00',
+                'COMPOSITE': '#ffaa00'
+            };
+
+            // Create from server data or use defaults
+            if (strategies && strategies.length > 0) {
+                strategies.forEach(s => {
+                    const validPrice = getValidPrice(s.price, defaultMid);
+                    strategyLines[s.name] = candleSeries.createPriceLine({
+                        price: validPrice,
+                        color: s.color || strategyColors[s.name] || '#ffffff',
+                        lineWidth: 1,
+                        lineStyle: LightweightCharts.LineStyle.Dashed,
+                        axisLabelVisible: true,
+                        title: s.name,
+                    });
+                });
+            } else {
+                // Create default strategy lines if none from server
+                Object.entries(strategyColors).forEach(([name, color]) => {
+                    strategyLines[name] = candleSeries.createPriceLine({
+                        price: defaultMid,
+                        color: color,
+                        lineWidth: 1,
+                        lineStyle: LightweightCharts.LineStyle.Dashed,
+                        axisLabelVisible: true,
+                        title: name,
+                    });
+                });
+            }
+
+            // Create BID line
+            const validBid = getValidPrice(bidPrice, defaultMid * 0.97);
+            bidLine = candleSeries.createPriceLine({
+                price: validBid,
+                color: '#00ff00',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Solid,
                 axisLabelVisible: true,
-                title: s.name,
+                title: 'BID',
             });
-        });
 
-        // Add bid/ask lines
-        candleSeries.createPriceLine({
-            price: {{ bid_price }},
-            color: '#00ff00',
-            lineWidth: 2,
-            lineStyle: LightweightCharts.LineStyle.Solid,
-            axisLabelVisible: true,
-            title: 'BID',
-        });
-        candleSeries.createPriceLine({
-            price: {{ ask_price }},
-            color: '#ff0000',
-            lineWidth: 2,
-            lineStyle: LightweightCharts.LineStyle.Solid,
-            axisLabelVisible: true,
-            title: 'ASK',
-        });
+            // Create ASK line
+            const validAsk = getValidPrice(askPrice, defaultMid * 1.03);
+            askLine = candleSeries.createPriceLine({
+                price: validAsk,
+                color: '#ff0000',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Solid,
+                axisLabelVisible: true,
+                title: 'ASK',
+            });
 
-        // Resize handler
+            linesInitialized = true;
+            console.log('Price lines initialized:', Object.keys(strategyLines), 'BID:', validBid, 'ASK:', validAsk);
+        }
+
+        // Update line prices (keeps lines visible, just changes price)
+        function updateLinePrices() {
+            const defaultMid = serverCandleData[serverCandleData.length - 1]?.close || 50;
+
+            // Update strategy lines
+            if (strategies && strategies.length > 0) {
+                strategies.forEach(s => {
+                    if (strategyLines[s.name]) {
+                        const validPrice = getValidPrice(s.price, defaultMid);
+                        strategyLines[s.name].applyOptions({ price: validPrice });
+                    }
+                });
+            }
+
+            // Update BID/ASK
+            if (bidLine) {
+                bidLine.applyOptions({ price: getValidPrice(bidPrice, defaultMid * 0.97) });
+            }
+            if (askLine) {
+                askLine.applyOptions({ price: getValidPrice(askPrice, defaultMid * 1.03) });
+            }
+        }
+
+        // Initialize chart with server data (already real from API)
+        // Server sends 4H candles by default, we use that initially
+        candleSeries.setData(serverCandleData);
+        console.log('Initial chart loaded with', serverCandleData.length, 'candles from server');
+
+        // Debug: log strategies data
+        console.log('Strategies loaded:', strategies);
+        console.log('Bid price:', bidPrice, 'Ask price:', askPrice);
+
+        // Initialize price lines AFTER data is set
+        initializePriceLines();
+
+        // Resize handler for responsive chart
         new ResizeObserver(() => {
             chart.applyOptions({
                 width: chartContainer.clientWidth,
@@ -365,64 +600,218 @@
                 }
             }
         }
-
         window.filterMarkets = filterMarkets;
 
-        // Timeframe configurations (interval in seconds)
-        const timeframes = {
-            '1m': 60, '5m': 300, '15m': 900, '1H': 3600,
-            '4H': 14400, '1D': 86400, '1W': 604800
-        };
-        let currentTimeframe = '4H';
-
-        // Generate candles for different timeframes
-        function generateCandles(intervalSeconds, count = 50) {
-            const basePrice = candleData[candleData.length - 1]?.close || 50;
-            const now = Math.floor(Date.now() / 1000);
-            const newCandles = [];
-            let price = basePrice * 0.95;
-
-            for (let i = 0; i < count; i++) {
-                const time = now - (count - i) * intervalSeconds;
-                const volatility = intervalSeconds > 3600 ? 0.03 : 0.015;
-                const change = (Math.random() - 0.5) * 2 * volatility;
-                const open = price;
-                const close = price * (1 + change);
-                const high = Math.max(open, close) * (1 + Math.random() * 0.01);
-                const low = Math.min(open, close) * (1 - Math.random() * 0.01);
-                newCandles.push({
-                    time: time,
-                    open: parseFloat(open.toFixed(4)),
-                    high: parseFloat(high.toFixed(4)),
-                    low: parseFloat(low.toFixed(4)),
-                    close: parseFloat(close.toFixed(4))
-                });
-                price = close;
-            }
-            return newCandles;
-        }
-
         // Timeframe button handlers
-        document.getElementById('timeframeButtons').addEventListener('click', (e) => {
+        document.getElementById('timeframeButtons').addEventListener('click', async (e) => {
             if (e.target.classList.contains('chart-btn')) {
                 const tf = e.target.dataset.tf;
                 if (tf === currentTimeframe) return;
+                if (isLoadingCandles) return; // Prevent double-click
 
                 document.querySelectorAll('#timeframeButtons .chart-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentTimeframe = tf;
 
-                // Generate new candles for this timeframe
-                const interval = timeframes[tf];
-                const newCandles = generateCandles(interval);
-                candleSeries.setData(newCandles);
+                // Show loading state
+                e.target.textContent = '...';
 
-                console.log('Timeframe changed to:', tf);
+                // Fetch REAL candles from BlockyCRAFT API
+                const candles = await fetchRealCandles(currentMarket, tf);
+
+                // Restore button text
+                e.target.textContent = tf;
+
+                if (candles && candles.length > 0) {
+                    candleSeries.setData(candles);
+                    console.log('Timeframe changed to:', tf, '- Loaded', candles.length, 'real candles');
+                } else {
+                    // No data for this timeframe - clear chart
+                    console.warn('No candles available for', tf, '- clearing chart');
+                    candleSeries.setData([]);
+                }
+
+                // Lines persist automatically - no need to recreate
+                updateLinePrices();
             }
         });
 
         // Initialize drawing tools
         initDrawingTools('drawCanvas', 'chartContainer');
+
+        // ===========================================
+        // INTERNATIONALIZATION (i18n) SYSTEM
+        // ===========================================
+        const translations = {
+            pt: {
+                // Header
+                realized_pnl: "P&L Realizado",
+                orders: "Ordens",
+                markets: "Mercados",
+                // Sidebar
+                active_markets: "Mercados Ativos",
+                search_market: "Buscar mercado... (ex: STON/IRON)",
+                // Bot Orders
+                bot_orders: "Ordens do Bot",
+                buy_order: "Ordem de COMPRA",
+                sell_order: "Ordem de VENDA",
+                position: "Posição",
+                // Order Book
+                order_book: "Livro de Ordens",
+                // Trade Log
+                trade_log: "Histórico de Trades",
+                // Footer
+                last_update: "Última atualização",
+                auto_refresh_disabled: "Auto-refresh desativado",
+                // Strategy Cards
+                confidence: "Confiança",
+                waiting_data: "Aguardando dados...",
+                // Strategy Info
+                scarcity_title: "Escassez",
+                scarcity_text: "Ajusta o preço comprando e vendendo de acordo com o nível do estoque. Se o estoque está cheio, o preço cai para vender mais rápido. Se está vazio, o preço sobe para evitar ficar sem produtos.",
+                ticker_title: "Ticker",
+                ticker_text: "Representa o último preço negociado no mercado BlockyCRAFT real (sem influência do bot). É a referência de quanto outros jogadores estão pagando no momento.",
+                vwap_title: "VWAP",
+                vwap_text: "O VWAP (Volume Weighted Average Price) calcula o preço médio considerando o volume das negociações. Dá uma noção melhor da tendência de preço real do que apenas o 'último trade'.",
+                composite_title: "Composto",
+                composite_text: "É o veredito final do robô. Esta estratégia combina todas as outras (Escassez, VWAP, Mercado) para decidir o 'Preço Justo' ideal para colocar as ordens de compra e venda agora."
+            },
+            en: {
+                // Header
+                realized_pnl: "Realized P&L",
+                orders: "Orders",
+                markets: "Markets",
+                // Sidebar
+                active_markets: "Active Markets",
+                search_market: "Search market... (ex: STON/IRON)",
+                // Bot Orders
+                bot_orders: "Bot Orders",
+                buy_order: "BUY Order",
+                sell_order: "SELL Order",
+                position: "Position",
+                // Order Book
+                order_book: "Order Book",
+                // Trade Log
+                trade_log: "Trade Log",
+                // Footer
+                last_update: "Last update",
+                auto_refresh_disabled: "Auto-refresh disabled",
+                // Strategy Cards
+                confidence: "Confidence",
+                waiting_data: "Waiting for data...",
+                // Strategy Info
+                scarcity_title: "Scarcity",
+                scarcity_text: "Adjusts prices based on inventory levels. When stock is full, prices drop to sell faster. When empty, prices rise to avoid running out of products.",
+                ticker_title: "Ticker",
+                ticker_text: "Represents the last traded price on the real BlockyCRAFT market (without bot influence). It's a reference for what other players are currently paying.",
+                vwap_title: "VWAP",
+                vwap_text: "VWAP calculates the average price considering trading volume. It gives a better sense of the real price trend than just the 'last trade'.",
+                composite_title: "Composite",
+                composite_text: "This is the bot's final verdict. This strategy combines all others (Scarcity, VWAP, Market) to decide the optimal 'Fair Price' for placing buy and sell orders."
+            }
+        };
+
+        // Strategy info with i18n support
+        function getStrategyInfo(strategy) {
+            const lang = currentLanguage;
+            const key = strategy.toLowerCase();
+            return {
+                title: translations[lang][`${key}_title`] || strategyInfo[key]?.title || strategy,
+                text: translations[lang][`${key}_text`] || strategyInfo[key]?.text || ''
+            };
+        }
+
+        // Auto-detect language from browser, fallback to localStorage or 'pt'
+        function detectLanguage() {
+            const stored = localStorage.getItem('dashboard_lang');
+            if (stored) return stored;
+
+            const browserLang = navigator.language || navigator.userLanguage || '';
+            if (browserLang.toLowerCase().startsWith('en')) return 'en';
+            return 'pt'; // Default to Portuguese
+        }
+
+        let currentLanguage = detectLanguage();
+
+        function toggleLangDropdown() {
+            const dropdown = document.getElementById('langDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('dashboard_lang', lang);
+            applyTranslations();
+            updateLangButton();
+            document.getElementById('langDropdown').classList.remove('show');
+        }
+
+        function applyTranslations() {
+            const t = translations[currentLanguage];
+
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key]) {
+                    el.placeholder = t[key];
+                }
+            });
+
+            // Update dropdown active state
+            document.querySelectorAll('.lang-option').forEach((opt, i) => {
+                opt.classList.remove('active');
+                if ((i === 0 && currentLanguage === 'pt') || (i === 1 && currentLanguage === 'en')) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function updateLangButton() {
+            const flag = document.getElementById('currentFlag');
+            const langText = document.getElementById('currentLang');
+
+            if (currentLanguage === 'en') {
+                flag.textContent = '🇺🇸';
+                langText.textContent = 'English';
+            } else {
+                flag.textContent = '🇧🇷';
+                langText.textContent = 'Português';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const langSelector = document.querySelector('.language-selector');
+            if (langSelector && !langSelector.contains(e.target)) {
+                document.getElementById('langDropdown').classList.remove('show');
+            }
+        });
+
+        // Override showStrategyInfo to use i18n
+        window.showStrategyInfo = function (strategy) {
+            const info = getStrategyInfo(strategy);
+            document.getElementById('modalTitle').innerText = info.title;
+            document.getElementById('modalText').innerText = info.text;
+            document.getElementById('infoModal').style.display = "block";
+        };
+
+        // Initialize language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTranslations();
+            updateLangButton();
+        });
+
+        // Also apply immediately in case DOMContentLoaded already fired
+        applyTranslations();
+        updateLangButton();
     </script>
 </body>
 
