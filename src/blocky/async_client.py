@@ -44,6 +44,19 @@ class AsyncRateLimiter:
                     await asyncio.sleep(sleep_time)
             
             self.timestamps.append(time.time())
+    
+    def get_stats(self) -> dict:
+        """Returns rate limiter statistics."""
+        now = time.time()
+        cutoff = now - self.window_seconds
+        current_count = len([t for t in self.timestamps if t > cutoff])
+        return {
+            'current_window_size': current_count,
+            'max_requests': self.max_requests,
+            'window_seconds': self.window_seconds,
+            'total_requests': 0,  # Not tracked in async version
+            'total_waits': 0,  # Not tracked in async version
+        }
 
 
 class AsyncCircuitBreaker:
@@ -106,6 +119,18 @@ class AsyncCircuitBreaker:
             if self.failure_count >= self.failure_threshold:
                 self.state = CircuitBreakerState.OPEN
                 logger.warning("Circuit breaker: OPEN")
+    
+    def get_stats(self) -> dict:
+        """Returns circuit breaker statistics."""
+        return {
+            'state': self.state.name,
+            'failures': self.failure_count,
+            'failure_threshold': self.failure_threshold,
+            'total_blocked': 0,  # Not tracked in async version
+            'total_failures': self.failure_count,
+            'total_successes': 0,  # Not tracked in async version
+            'recovery_timeout': self.recovery_timeout
+        }
 
 
 class RateLimitException(Exception):
