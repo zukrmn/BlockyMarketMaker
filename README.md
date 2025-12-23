@@ -247,6 +247,58 @@ docker-compose up -d
 
 ---
 
+## Running as a Linux Service (Background)
+
+For Linux users who want the bot to run in the background and start automatically on boot.
+
+### Install the Service
+
+```bash
+# Make the script executable (first time only)
+chmod +x service.sh
+
+# Install the systemd service
+./service.sh install
+```
+
+> **Note:** The install command will ask for your sudo password. The service file contains paths specific to your installation - if you move the project folder, you'll need to update `blocky-market-maker.service` and reinstall.
+
+### Managing the Service
+
+```bash
+# Start the bot
+./service.sh start
+
+# Stop the bot
+./service.sh stop
+
+# Restart the bot
+./service.sh restart
+
+# Check status
+./service.sh status
+
+# View logs (live, Ctrl+C to exit)
+./service.sh logs
+
+# View full log history
+./service.sh logs-full
+
+# Uninstall the service
+./service.sh uninstall
+```
+
+### Desktop Notifications
+
+The service is configured to send desktop notifications when trades are executed. If you're using **Wayland** (default on Ubuntu 22.04+, Fedora, ZorinOS 17+), notifications should work automatically.
+
+If notifications aren't working:
+1. Check that `notify-send` is installed: `which notify-send`
+2. For sound, ensure `paplay` (PulseAudio) or `aplay` (ALSA) is available
+3. The service must be running under your user account (not root)
+
+---
+
 ## Configuration Guide
 
 All settings are in `config.yaml`. Environment variables override YAML values.
