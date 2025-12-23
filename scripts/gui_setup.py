@@ -47,8 +47,9 @@ class SetupWizard:
         
         # Setup window
         self.root.title("BlockyMarketMaker - Setup")
-        self.root.geometry("600x500")
-        self.root.resizable(False, False)
+        self.root.geometry("600x600")
+        self.root.resizable(True, True)
+        self.root.minsize(600, 550)
         
         # Center window
         self.center_window()
@@ -89,7 +90,7 @@ class SetupWizard:
         """Center the window on screen."""
         self.root.update_idletasks()
         w = 600
-        h = 500
+        h = 600
         x = (self.root.winfo_screenwidth() // 2) - (w // 2)
         y = (self.root.winfo_screenheight() // 2) - (h // 2)
         self.root.geometry(f"{w}x{h}+{x}+{y}")
