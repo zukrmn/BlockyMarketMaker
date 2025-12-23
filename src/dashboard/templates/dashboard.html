@@ -403,9 +403,12 @@
         const bidPrice = {{ bid_price }};
         const askPrice = {{ ask_price }};
 
+
         // Get current market from URL path (e.g., /dashboard/coal_iron -> coal_iron)
         const pathParts = window.location.pathname.split('/');
-        const currentMarket = pathParts[pathParts.length - 1] || 'diam_iron';
+        const urlMarket = pathParts[pathParts.length - 1];
+        // If URL ends with 'dashboard' (no market specified), use default
+        const currentMarket = (urlMarket && urlMarket !== 'dashboard' && urlMarket !== '') ? urlMarket : 'diam_iron';
         console.log('Current market:', currentMarket);
 
         // Timeframe configurations (matching BlockyCRAFT interface)
@@ -702,9 +705,9 @@
                 trade_log: "Histórico de Trades",
                 no_trades_yet: "Nenhum trade ainda...",
                 // Footer
-                last_update: "Última atualização",
-                auto_refresh_disabled: "Auto-refresh desativado",
-                realtime_connected: "Conectado em tempo real",
+                last_update: "Atualização",
+                auto_refresh_disabled: "Auto-refresh off",
+                realtime_connected: "Ao vivo",
                 realtime_disconnected: "Desconectado",
                 connecting: "Conectando...",
                 // Strategy Cards
@@ -739,9 +742,9 @@
                 trade_log: "Trade Log",
                 no_trades_yet: "No trades yet...",
                 // Footer
-                last_update: "Last update",
-                auto_refresh_disabled: "Auto-refresh disabled",
-                realtime_connected: "Connected in real-time",
+                last_update: "Updated",
+                auto_refresh_disabled: "Auto-refresh off",
+                realtime_connected: "Live",
                 realtime_disconnected: "Disconnected",
                 connecting: "Connecting...",
                 // Strategy Cards
