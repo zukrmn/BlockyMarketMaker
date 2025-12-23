@@ -20,6 +20,9 @@ class DrawingTools {
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
 
+        // Market persistence
+        this.currentMarket = null;
+
         this.init();
         this.createContextMenu();
     }
@@ -273,6 +276,7 @@ class DrawingTools {
 
         this.contextMenu.style.display = 'none';
         this.redrawAll();
+        this.saveDrawings();  // Auto-save after changes
     }
 
     resizeCanvas() {
@@ -315,6 +319,62 @@ class DrawingTools {
         this.drawings = [];
         this.selectedIndex = -1;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.saveDrawings();  // Persist the cleared state
+    }
+
+    // === PERSISTENCE METHODS ===
+
+    /**
+     * Save drawings to localStorage for current market
+     */
+    saveDrawings() {
+        if (!this.currentMarket) return;
+        try {
+            const key = `drawings_${this.currentMarket}`;
+            localStorage.setItem(key, JSON.stringify(this.drawings));
+            console.log(`Saved ${this.drawings.length} drawings for ${this.currentMarket}`);
+        } catch (e) {
+            console.error('Error saving drawings:', e);
+        }
+    }
+
+    /**
+     * Load drawings from localStorage for current market
+     */
+    loadDrawings() {
+        if (!this.currentMarket) return;
+        try {
+            const key = `drawings_${this.currentMarket}`;
+            const data = localStorage.getItem(key);
+            if (data) {
+                this.drawings = JSON.parse(data);
+                console.log(`Loaded ${this.drawings.length} drawings for ${this.currentMarket}`);
+            } else {
+                this.drawings = [];
+            }
+            this.selectedIndex = -1;
+            this.redrawAll();
+        } catch (e) {
+            console.error('Error loading drawings:', e);
+            this.drawings = [];
+        }
+    }
+
+    /**
+     * Switch to a different market - saves current and loads new
+     */
+    setMarket(market) {
+        if (market === this.currentMarket) return;
+
+        // Save current market's drawings before switching
+        if (this.currentMarket) {
+            this.saveDrawings();
+        }
+
+        // Switch to new market and load its drawings
+        this.currentMarket = market;
+        this.loadDrawings();
+        console.log(`Switched to market: ${market}`);
     }
 
     deleteSelected() {
@@ -322,6 +382,7 @@ class DrawingTools {
             this.drawings.splice(this.selectedIndex, 1);
             this.selectedIndex = -1;
             this.redrawAll();
+            this.saveDrawings();  // Auto-save after deletion
         }
     }
 
@@ -628,12 +689,14 @@ class DrawingTools {
         if (this.currentTool === 'cross') {
             this.drawings.push({ type: 'cross', x: pos.x, y: pos.y, color: '#888888', dashed: true });
             this.redrawAll();
+            this.saveDrawings();  // Auto-save
             return;
         }
 
         if (this.currentTool === 'vline') {
             this.drawings.push({ type: 'vline', x: pos.x, color: '#ff00ff' });
             this.redrawAll();
+            this.saveDrawings();  // Auto-save
             return;
         }
 
@@ -741,6 +804,7 @@ class DrawingTools {
         if (this.isDragging) {
             this.isDragging = false;
             this.canvas.style.cursor = 'default';
+            this.saveDrawings();  // Auto-save after moving
             return;
         }
 
@@ -776,6 +840,7 @@ class DrawingTools {
         }
 
         this.redrawAll();
+        this.saveDrawings();  // Auto-save after drawing
     }
 
     onMouseLeave() {
@@ -795,6 +860,7 @@ class DrawingTools {
             // Open properties dialog (simplified - just toggle dashed)
             this.drawings[hitIndex].dashed = !this.drawings[hitIndex].dashed;
             this.redrawAll();
+            this.saveDrawings();  // Auto-save after property change
         }
     }
 
@@ -838,8 +904,12 @@ class DrawingTools {
 // Global instance
 let drawingTools = null;
 
-function initDrawingTools(canvasId, chartContainerId) {
+function initDrawingTools(canvasId, chartContainerId, initialMarket) {
     drawingTools = new DrawingTools(canvasId, chartContainerId);
+    // Set initial market and load saved drawings
+    if (initialMarket) {
+        drawingTools.setMarket(initialMarket);
+    }
     return drawingTools;
 }
 
@@ -852,5 +922,14 @@ function setDrawTool(tool) {
 function clearDrawings() {
     if (drawingTools) {
         drawingTools.clearDrawings();
+    }
+}
+
+/**
+ * Switch to a different market - saves current drawings and loads saved drawings for new market
+ */
+function setDrawingMarket(market) {
+    if (drawingTools) {
+        drawingTools.setMarket(market);
     }
 }

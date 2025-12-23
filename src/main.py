@@ -14,6 +14,7 @@ from metrics import MetricsTracker
 from alerts import AlertManager, AlertLevel
 from config import get_config
 from health import HealthServer
+from capital_allocator import CapitalAllocator, AllocationConfig
 from trading_helpers import (
     calculate_quotes,
     apply_pennying,
@@ -105,6 +106,9 @@ class MarketMaker:
         # Performance Metrics
         self.metrics = MetricsTracker()
         
+        # Dashboard reference for real-time updates (set externally)
+        self.dashboard = None
+        
         # Alert System
         self.alerts = AlertManager(
             webhook_url=os.environ.get("ALERT_WEBHOOK_URL"),
@@ -132,8 +136,28 @@ class MarketMaker:
         # Key: market, Value: {asks: [...], bids: [...], last_update: timestamp}
         self.orderbook_cache: Dict[str, Dict[str, Any]] = {}
         
+        # Local Order Cache: Track orders placed by this bot to prevent duplicates
+        # Key: market, Value: {"buy": order_id or None, "sell": order_id or None}
+        # This prevents creating duplicate orders before HTTP API reflects changes
+        self.pending_orders: Dict[str, Dict[str, Optional[int]]] = {}
+        
+        # Dynamic Capital Allocator
+        alloc_config = AllocationConfig(
+            enabled=config.capital_allocation.enabled,
+            base_reserve_ratio=config.capital_allocation.base_reserve_ratio,
+            max_reserve_ratio=config.capital_allocation.max_reserve_ratio,
+            min_order_value=config.capital_allocation.min_order_value,
+            priority_markets=config.capital_allocation.priority_markets,
+            priority_boost=config.capital_allocation.priority_boost,
+        )
+        self.capital_allocator = CapitalAllocator(alloc_config)
+        self.dynamic_target_value: float = TARGET_VALUE  # Will be updated dynamically
+        
         if spread_config.enabled:
             logger.info("📊 Dynamic spread calculation enabled")
+        
+        if alloc_config.enabled:
+            logger.info("💰 Dynamic capital allocation enabled")
 
     async def _on_event_update(self, data: Dict[str, Any]) -> None:
         """Callback for real-time events (Trade or Orderbook).
@@ -453,6 +477,16 @@ class MarketMaker:
             
             if new_trades:
                 logger.info(f"Processed {len(new_trades)} new trade(s)")
+                # Broadcast stats update to dashboard clients
+                if self.dashboard and hasattr(self.dashboard, 'broadcast_event'):
+                    import asyncio
+                    simple_stats = {
+                        'realized_pnl': self.metrics.get_realized_pnl(),
+                        'total_trades': len(self.metrics.trades),
+                        'orders_placed': self.metrics.orders_placed,
+                        'market_count': len(self.config.markets) if hasattr(self, 'config') else 0
+                    }
+                    asyncio.create_task(self.dashboard.broadcast_event('stats_update', simple_stats))
                 
         except Exception as e:
             logger.error(f"Error polling trades: {e}")
@@ -569,12 +603,14 @@ class MarketMaker:
                 else:
                     quote_balance = cap_source.get(quote.lower(), 0) + locked_quote
                 
-                # Target Value Liquidity Strategy (using config value)
+                # Target Value Liquidity Strategy (using dynamic allocation)
                 check_price = buy_price if buy_price > 0 else (sell_price if sell_price > 0 else 0)
                 
                 # DYNAMIC SIZING BASED ON CAPITAL
-                allocated_value = TARGET_VALUE
-                if quote == "iron" and quote_balance < TARGET_VALUE:
+                # Use dynamically calculated target_value based on Iron inventory
+                target_value = self.dynamic_target_value
+                allocated_value = target_value
+                if quote == "iron" and quote_balance < target_value:
                      allocated_value = quote_balance
                 
                 # Min Notional Check (0.05 buffer)
@@ -672,49 +708,73 @@ class MarketMaker:
                                      logger.error(f"{market}: Failed to cancel order: {res}")
                             else:
                                 self.metrics.record_order_cancelled()
+                    
+                    # Clear pending orders cache for this market since we cancelled orders
+                    if market in self.pending_orders:
+                        for oid in orders_to_cancel:
+                            if self.pending_orders[market].get("buy") == oid:
+                                self.pending_orders[market]["buy"] = None
+                            if self.pending_orders[market].get("sell") == oid:
+                                self.pending_orders[market]["sell"] = None
 
                 # Execute Changes (Create New)
                 create_tasks = []
                 
-                if should_buy and not buy_active and buy_price > 0:
+                # Check local pending orders cache to prevent duplicates
+                pending = self.pending_orders.get(market, {"buy": None, "sell": None})
+                has_pending_buy = pending.get("buy") is not None
+                has_pending_sell = pending.get("sell") is not None
+                
+                if should_buy and not buy_active and not has_pending_buy and buy_price > 0:
                     if config.trading.dry_run:
                         logger.info(f"🧪 [DRY-RUN] {market}: Would place Buy {buy_price:.2f} x {required_qty}")
                         self.metrics.record_order_placed()
                         self.metrics.record_spread(market, buy_price, sell_price)
                     else:
-                        create_tasks.append(
+                        create_tasks.append(("buy", 
                             self.client.create_order(
                                  market=market, side="buy", type_="limit", 
                                  price=f"{buy_price:.2f}", quantity=f"{required_qty:.2f}"
                             )
-                        )
+                        ))
                 
-                if should_sell and not sell_active and sell_price > 0:
+                if should_sell and not sell_active and not has_pending_sell and sell_price > 0:
                     if config.trading.dry_run:
                         logger.info(f"🧪 [DRY-RUN] {market}: Would place Sell {sell_price:.2f} x {sell_qty}")
                         self.metrics.record_order_placed()
                     else:
-                        create_tasks.append(
+                        create_tasks.append(("sell",
                             self.client.create_order(
                                  market=market, side="sell", type_="limit", 
                                  price=f"{sell_price:.2f}", quantity=f"{sell_qty:.2f}"
                             )
-                        )
+                        ))
                 
                 if create_tasks:
-                    results = await asyncio.gather(*create_tasks, return_exceptions=True)
-                    for res in results:
+                    # Execute tasks and track results
+                    tasks_only = [t[1] for t in create_tasks]
+                    sides = [t[0] for t in create_tasks]
+                    results = await asyncio.gather(*tasks_only, return_exceptions=True)
+                    
+                    for side, res in zip(sides, results):
                          if isinstance(res, Exception):
                              if "3003" in str(res) or "Funds error" in str(res): # Check 3003 code
                                  logger.warning(f"{market}: Order failed - Insufficient funds/inventory.")
                              else:
                                  logger.error(f"{market}: Place order failed: {res}")
                          else:
-                             side = res.get("side", "unknown") if isinstance(res, dict) else "unknown"
-                             logger.info(f"{market}: Placed {side} order.")
+                             order_id = res.get("id") or res.get("order_id") if isinstance(res, dict) else None
+                             actual_side = res.get("side", side) if isinstance(res, dict) else side
+                             logger.info(f"{market}: Placed {actual_side} order.")
                              self.metrics.record_order_placed()
-                             if side == "buy":
+                             if actual_side == "buy":
                                  self.metrics.record_spread(market, buy_price, sell_price)
+                             
+                             # Update pending orders cache
+                             if order_id:
+                                 if market not in self.pending_orders:
+                                     self.pending_orders[market] = {"buy": None, "sell": None}
+                                 self.pending_orders[market][actual_side] = order_id
 
 
             
@@ -742,6 +802,36 @@ class MarketMaker:
             # Update wallets once
             await self._update_wallets()
             
+            # Fetch Open Orders FIRST (needed for capital calculation)
+            open_orders_map = await self._fetch_open_orders()
+            
+            # Calculate total Iron including locked funds in open orders
+            # This prevents the "capital drops to 0" issue when Iron is allocated to orders
+            iron_wallet = self.wallets.get("iron", 0)
+            iron_locked_in_orders = 0.0
+            for market, orders in open_orders_map.items():
+                for order in orders:
+                    if order.get("side") == "buy":
+                        # Buy orders lock quote (Iron)
+                        try:
+                            price = float(order.get("price", 0))
+                            qty = float(order.get("quantity", 0))
+                            iron_locked_in_orders += price * qty
+                        except (ValueError, TypeError):
+                            pass
+            
+            # Total capital = wallet + locked in orders
+            total_iron_capital = iron_wallet + iron_locked_in_orders
+            num_markets = len(self.markets)
+            
+            # Use FIXED target_value from config instead of dynamic calculation
+            # This prevents order churn when capital fluctuates between cycles
+            self.dynamic_target_value = TARGET_VALUE
+            
+            if config.capital_allocation.enabled and total_iron_capital > 0 and num_markets > 0:
+                # Just log for informational purposes, but don't use for order sizing
+                self.capital_allocator.log_allocation(total_iron_capital, num_markets)
+            
             # Initialize local capital tracker for this batch
             tracker = self.wallets.copy()
             
@@ -764,8 +854,7 @@ class MarketMaker:
             except Exception as e:
                 logger.error(f"Failed to fetch tickers batch: {e}")
             
-            # Fetch Open Orders
-            open_orders_map = await self._fetch_open_orders()
+            # Open orders already fetched above
             
             # Asyncio gather 
             tasks = [self._process_market(m, supplies, ticker_map.get(m), open_orders_map.get(m), capital_tracker=tracker) for m in self.markets]
@@ -942,12 +1031,18 @@ async def main() -> None:
     
     # Start dashboard with bot integration
     dashboard = TradingDashboard(bot=bot, port=8081)
+    bot.dashboard = dashboard  # Link dashboard for real-time WebSocket updates
     await dashboard.start()
     logger.info("📊 Dashboard started at http://localhost:8081/dashboard")
     
     try:
         await bot.run()
     finally:
+        # Ensure client session is closed to prevent "Unclosed client session" warning
+        try:
+            await bot.client.close()
+        except Exception:
+            pass
         await dashboard.stop()
 
 if __name__ == "__main__":

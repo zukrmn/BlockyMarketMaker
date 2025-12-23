@@ -11,13 +11,22 @@ api:
 trading:
   dry_run: false                  # Set true to simulate without real orders
   enabled_markets: []             # Whitelist: empty = all markets, otherwise only these
-  disabled_markets: []  # Temporarily enabled for API testing
+  disabled_markets: []            # Blacklist: never trade these
   # Example: disabled_markets: [sand_iron, dirt_iron]
   spread: 0.05                    # 5% spread (0.05 = 5%)
   min_spread_ticks: 0.01          # Minimum spread in price units
-  target_value: 5.0              # Target order value in Iron
+  target_value: 5.0               # Fallback target value (used if dynamic allocation disabled)
   max_quantity: 6400              # Maximum order quantity
   refresh_interval: 60            # Seconds between integrity checks
+
+# Dynamic Capital Allocation (Portfolio Management)
+capital_allocation:
+  enabled: true                   # Enable dynamic allocation based on inventory
+  base_reserve_ratio: 0.10        # Minimum 10% reserve
+  max_reserve_ratio: 0.30         # Maximum 30% reserve
+  min_order_value: 0.10           # Minimum order value in Iron
+  priority_markets: [diam_iron, gold_iron, slme_iron]  # Higher allocation for these
+  priority_boost: 1.5             # 50% more allocation for priority markets
 
 # Rate Limiting
 rate_limit:

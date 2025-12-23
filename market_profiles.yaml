@@ -1,0 +1,179 @@
+# Market Profiles for Blocky Market Maker
+# This file helps LLMs understand market characteristics for strategy optimization
+# Updated automatically by generate_reports.py or manually by operators
+
+# High-value markets (Diamond, Gold, Lapis)
+diam_iron:
+  description: "Diamond - Highest value commodity, best liquidity"
+  base_price: 50.0
+  avg_spread: 3.05%
+  volatility: low
+  volume_rank: 1
+  best_hours: "10:00-22:00 UTC"
+  notes: "Most stable market, ideal for conservative strategies"
+  status: active
+
+gold_iron:
+  description: "Gold - Second highest value, good liquidity"
+  base_price: 5.0
+  avg_spread: 3.05%
+  volatility: medium
+  volume_rank: 2
+  correlation: "Follows diam_iron with slight delay"
+  notes: "Good secondary market for diversification"
+  status: active
+
+lapi_iron:
+  description: "Lapis Lazuli - Mid-tier value block"
+  base_price: 2.0
+  avg_spread: 3.05%
+  volatility: low
+  volume_rank: 5
+  notes: "Often low inventory due to scarcity in-game"
+  status: active
+
+# Common resources
+coal_iron:
+  description: "Coal - Essential resource, moderate trading"
+  base_price: 0.5
+  avg_spread: 4.08%
+  volatility: low
+  volume_rank: 3
+  notes: "Steady supply, good for market making"
+  status: active
+
+ston_iron:
+  description: "Cobblestone - Very common, high supply"
+  base_price: 0.10
+  avg_spread: 11.11%
+  volatility: low
+  volume_rank: 10
+  notes: "Wide spread due to low value per unit"
+  status: active
+
+cobl_iron:
+  description: "Cobblestone variant"
+  base_price: 0.04
+  avg_spread: 25.00%
+  volatility: low
+  volume_rank: 30
+  notes: "Very low value, wide spread necessary"
+  status: active
+
+# Previously problematic markets
+sand_iron:
+  description: "Sand - Common building material"
+  base_price: 0.05
+  avg_spread: 25.00%
+  volatility: low
+  volume_rank: 25
+  historical_issues:
+    - "2025-12-21: API returned empty orderbook temporarily"
+  notes: "Monitor for API stability"
+  status: active
+
+rmus_iron:
+  description: "Red Mushroom - Decorative/food item"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: medium
+  volume_rank: 20
+  historical_issues:
+    - "2025-12-21: API returned empty orderbook temporarily"
+  notes: "Monitor for API stability"
+  status: active
+
+# Log-type markets (Oak, Spruce, Birch, etc.)
+olog_iron:
+  description: "Oak Log - Common wood type"
+  base_price: 0.45
+  avg_spread: 4.55%
+  volatility: low
+  volume_rank: 8
+  status: active
+
+slog_iron:
+  description: "Spruce Log"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 12
+  notes: "Often no sell inventory available"
+  status: active
+
+blog_iron:
+  description: "Birch Log"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 15
+  notes: "Often no sell inventory available"
+  status: active
+
+# Food/Animal products
+beef_iron:
+  description: "Raw Beef - Food item"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 18
+  notes: "Usually no sell inventory"
+  status: active
+
+fish_iron:
+  description: "Raw Fish - Food item from fishing"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 22
+  status: active
+
+eggs_iron:
+  description: "Eggs - Chicken product"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 24
+  status: active
+
+# Plant/Farm products
+whet_iron:
+  description: "Wheat - Basic farm product"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 11
+  status: active
+
+sugr_iron:
+  description: "Sugar - Crafting ingredient"
+  base_price: 1.0
+  avg_spread: 3.06%
+  volatility: low
+  volume_rank: 16
+  status: active
+
+# Slime and special items
+slme_iron:
+  description: "Slime Ball - Special drop from slimes"
+  base_price: 5.0
+  avg_spread: 3.05%
+  volatility: medium
+  volume_rank: 4
+  notes: "Valuable due to rarity, good for trading"
+  status: active
+
+# Strategy recommendations for LLM
+_strategy_notes:
+  spread_guidelines:
+    - "High-value items (>10 Iron): 3% spread is optimal"
+    - "Mid-value items (1-10 Iron): 3-5% spread"
+    - "Low-value items (<1 Iron): 10-25% spread to cover fees"
+  
+  inventory_management:
+    - "Markets with 0% sell_active need inventory acquisition"
+    - "Consider one-sided (buy-only) strategy for scarce items"
+  
+  risk_factors:
+    - "API stability varies by market - monitor orderbook responses"
+    - "Low-liquidity markets may have stale prices"

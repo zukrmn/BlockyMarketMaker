@@ -111,6 +111,16 @@ class StrategyConfig(BaseModel):
     type: str = "composite"  # scarcity, ticker, vwap, composite
 
 
+class CapitalAllocationConfig(BaseModel):
+    """Dynamic capital allocation configuration."""
+    enabled: bool = True               # Enable dynamic allocation based on inventory
+    base_reserve_ratio: float = 0.10   # Minimum 10% reserve
+    max_reserve_ratio: float = 0.30    # Maximum 30% reserve
+    min_order_value: float = 0.10      # Minimum order value in Iron
+    priority_markets: List[str] = Field(default_factory=lambda: ["diam_iron", "gold_iron", "slme_iron"])
+    priority_boost: float = 1.5        # 50% more allocation for priority markets
+
+
 class Config(BaseSettings):
     """
     Main configuration container with environment variable support.
@@ -133,6 +143,7 @@ class Config(BaseSettings):
     dynamic_spread: DynamicSpreadConfig = Field(default_factory=DynamicSpreadConfig)
     health: HealthConfig = Field(default_factory=HealthConfig)
     strategy: StrategyConfig = Field(default_factory=StrategyConfig)
+    capital_allocation: CapitalAllocationConfig = Field(default_factory=CapitalAllocationConfig)
 
     model_config = {
         "extra": "ignore"

@@ -241,11 +241,12 @@ def is_order_match(
     o_price = float(order["price"])
     o_qty = float(order["quantity"])
     
-    # Use percentage-based tolerance for price (2% tolerance)
-    # and absolute tolerance for quantity (0.5 units)
-    # This prevents excessive order flickering when prices fluctuate slightly
-    price_tolerance = max(0.02, target_price * 0.02)  # At least 0.02, or 2% of price
-    qty_tolerance = max(0.5, target_qty * 0.1)  # At least 0.5, or 10% of quantity
+    # Use percentage-based tolerance for price (5% tolerance)
+    # and absolute tolerance for quantity (20% of target)
+    # Higher tolerance prevents excessive order flickering when prices fluctuate
+    # This reduces "Diff Mismatch" cancellations significantly
+    price_tolerance = max(0.05, target_price * 0.05)  # At least 0.05, or 5% of price
+    qty_tolerance = max(1.0, target_qty * 0.20)  # At least 1.0, or 20% of quantity
     
     return abs(o_price - target_price) < price_tolerance and abs(o_qty - target_qty) < qty_tolerance
 
