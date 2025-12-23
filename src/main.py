@@ -106,6 +106,9 @@ class MarketMaker:
         # Performance Metrics
         self.metrics = MetricsTracker()
         
+        # Dashboard reference for real-time updates (set externally)
+        self.dashboard = None
+        
         # Alert System
         self.alerts = AlertManager(
             webhook_url=os.environ.get("ALERT_WEBHOOK_URL"),
@@ -474,6 +477,16 @@ class MarketMaker:
             
             if new_trades:
                 logger.info(f"Processed {len(new_trades)} new trade(s)")
+                # Broadcast stats update to dashboard clients
+                if self.dashboard and hasattr(self.dashboard, 'broadcast_event'):
+                    import asyncio
+                    simple_stats = {
+                        'realized_pnl': self.metrics.get_realized_pnl(),
+                        'total_trades': len(self.metrics.trades),
+                        'orders_placed': self.metrics.orders_placed,
+                        'market_count': len(self.config.markets) if hasattr(self, 'config') else 0
+                    }
+                    asyncio.create_task(self.dashboard.broadcast_event('stats_update', simple_stats))
                 
         except Exception as e:
             logger.error(f"Error polling trades: {e}")
@@ -1018,12 +1031,18 @@ async def main() -> None:
     
     # Start dashboard with bot integration
     dashboard = TradingDashboard(bot=bot, port=8081)
+    bot.dashboard = dashboard  # Link dashboard for real-time WebSocket updates
     await dashboard.start()
     logger.info("📊 Dashboard started at http://localhost:8081/dashboard")
     
     try:
         await bot.run()
     finally:
+        # Ensure client session is closed to prevent "Unclosed client session" warning
+        try:
+            await bot.client.close()
+        except Exception:
+            pass
         await dashboard.stop()
 
 if __name__ == "__main__":

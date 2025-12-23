@@ -313,7 +313,7 @@
 
             <div class="footer">
                 <span><span data-i18n="last_update">Última atualização</span>: {{timestamp}}</span>
-                <span data-i18n="auto_refresh_disabled">Auto-refresh desativado</span>
+                <span id="connectionStatus">🔄 <span data-i18n="connecting">Conectando...</span></span>
             </div>
         </div>
     </div>
@@ -812,6 +812,112 @@
         // Also apply immediately in case DOMContentLoaded already fired
         applyTranslations();
         updateLangButton();
+
+        // ===========================================
+        // WEBSOCKET FOR REAL-TIME UPDATES
+        // ===========================================
+        (function initWebSocket() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+            let ws = null;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 5;
+
+            function connect() {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    console.log('📡 WebSocket connected');
+                    reconnectAttempts = 0;
+                    updateConnectionStatus(true);
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleWebSocketMessage(message);
+                    } catch (e) {
+                        console.error('Error parsing WebSocket message:', e);
+                    }
+                };
+
+                ws.onclose = () => {
+                    console.log('📡 WebSocket disconnected');
+                    updateConnectionStatus(false);
+                    // Attempt reconnection
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        setTimeout(connect, 3000 * reconnectAttempts);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+            }
+
+            function handleWebSocketMessage(message) {
+                if (message.type === 'stats_update') {
+                    updateDashboardStats(message.data);
+                }
+            }
+
+            function updateDashboardStats(stats) {
+                // Update P&L
+                const pnlElement = document.querySelector('.stat-value');
+                if (pnlElement && stats.realized_pnl !== undefined) {
+                    const pnl = stats.realized_pnl;
+                    pnlElement.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(2);
+                    pnlElement.parentElement.className = 'stat-card ' + (pnl >= 0 ? 'positive' : 'negative');
+                }
+
+                // Update trades count
+                const statCards = document.querySelectorAll('.stat-card');
+                statCards.forEach(card => {
+                    const label = card.querySelector('.stat-label');
+                    const value = card.querySelector('.stat-value');
+                    if (label && value) {
+                        const labelText = label.textContent.toLowerCase();
+                        if (labelText.includes('trade')) {
+                            value.textContent = stats.total_trades || 0;
+                        } else if (labelText.includes('order')) {
+                            value.textContent = stats.orders_placed || 0;
+                        }
+                    }
+                });
+
+                // Update timestamp
+                const footer = document.querySelector('.footer span:first-child');
+                if (footer) {
+                    const now = new Date();
+                    const timeStr = now.toTimeString().split(' ')[0];
+                    footer.innerHTML = `<span data-i18n="last_update">Última atualização</span>: ${timeStr}`;
+                }
+
+                // Update connection status text
+                const statusSpan = document.getElementById('connectionStatus');
+                if (statusSpan) {
+                    statusSpan.innerHTML = '🟢 <span data-i18n="realtime_connected">Conectado em tempo real</span>';
+                    statusSpan.style.color = '#00ff00';
+                }
+            }
+
+            function updateConnectionStatus(connected) {
+                const statusSpan = document.getElementById('connectionStatus');
+                if (statusSpan) {
+                    if (connected) {
+                        statusSpan.innerHTML = '🟢 <span data-i18n="realtime_connected">Conectado em tempo real</span>';
+                        statusSpan.style.color = '#00ff00';
+                    } else {
+                        statusSpan.innerHTML = '🔴 <span data-i18n="realtime_disconnected">Desconectado</span>';
+                        statusSpan.style.color = '#ff4444';
+                    }
+                }
+            }
+
+            // Start WebSocket connection
+            connect();
+        })();
     </script>
 </body>
 

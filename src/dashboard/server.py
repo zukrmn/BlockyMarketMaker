@@ -8,7 +8,7 @@ import time
 import json
 import random
 from typing import TYPE_CHECKING, Optional, Dict, Any, List
-from aiohttp import web, ClientSession
+from aiohttp import web, ClientSession, WSMsgType
 import aiohttp_jinja2
 import jinja2
 
@@ -48,6 +48,7 @@ class TradingDashboard:
         self.runner: Optional[web.AppRunner] = None
         self.selected_market = "diam_iron"
         self.candle_collector = get_collector()
+        self.ws_clients: set = set()  # Connected WebSocket clients for real-time updates
     
     async def start(self) -> None:
         """Start the dashboard HTTP server."""
@@ -65,6 +66,7 @@ class TradingDashboard:
         self.app.router.add_get('/dashboard/{market}', self._dashboard_handler)
         self.app.router.add_get('/api/stats', self._api_stats)
         self.app.router.add_get('/api/candles/{market}', self._api_candles)
+        self.app.router.add_get('/ws', self._websocket_handler)  # WebSocket for real-time updates
         
         # Static files
         self.app.router.add_static('/static', STATIC_DIR)
@@ -464,8 +466,8 @@ class TradingDashboard:
         
         pnl = stats["realized_pnl"]
         
-        # Try to get real candles from API first
-        candles = await self._fetch_candles_from_api(market)
+        # Try to get real candles from API first (5m = default timeframe)
+        candles = await self._fetch_candles_from_api(market, "5m")
         
         # Try to get real orderbook
         orderbook_data = await self._fetch_orderbook(market)
@@ -533,6 +535,69 @@ class TradingDashboard:
             candles = []
         
         return web.json_response(candles)
+    
+    # === WebSocket for Real-Time Updates ===
+    
+    async def _websocket_handler(self, request: web.Request) -> web.WebSocketResponse:
+        """Handle WebSocket connections for real-time dashboard updates."""
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+        
+        # Add to connected clients
+        self.ws_clients.add(ws)
+        logger.info(f"📡 WebSocket client connected ({len(self.ws_clients)} total)")
+        
+        try:
+            # Send initial stats on connect (JSON-safe simplified version)
+            simple_stats = {
+                'realized_pnl': 0.0,
+                'total_trades': 0,
+                'orders_placed': 0,
+                'market_count': 0
+            }
+            if self.bot and hasattr(self.bot, 'metrics'):
+                simple_stats = {
+                    'realized_pnl': self.bot.metrics.get_realized_pnl(),
+                    'total_trades': len(self.bot.metrics.trades),
+                    'orders_placed': self.bot.metrics.orders_placed,
+                    'market_count': len(self.bot.config.markets) if hasattr(self.bot, 'config') else 0
+                }
+            await ws.send_json({
+                'type': 'stats_update',
+                'data': simple_stats
+            })
+            
+            # Keep connection open and listen for messages
+            async for msg in ws:
+                if msg.type == WSMsgType.TEXT:
+                    # Client can send heartbeat or request updates
+                    if msg.data == 'ping':
+                        await ws.send_str('pong')
+                elif msg.type == WSMsgType.ERROR:
+                    logger.error(f'WebSocket error: {ws.exception()}')
+        finally:
+            self.ws_clients.discard(ws)
+            logger.info(f"📡 WebSocket client disconnected ({len(self.ws_clients)} remaining)")
+        
+        return ws
+    
+    async def broadcast_event(self, event_type: str, data: dict):
+        """Broadcast an event to all connected WebSocket clients."""
+        if not self.ws_clients:
+            return
+        
+        message = json.dumps({'type': event_type, 'data': data})
+        
+        # Send to all connected clients
+        disconnected = set()
+        for ws in self.ws_clients:
+            try:
+                await ws.send_str(message)
+            except Exception:
+                disconnected.add(ws)
+        
+        # Clean up disconnected clients
+        self.ws_clients -= disconnected
 
 
 # Backward compatibility aliases
