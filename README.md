@@ -587,15 +587,14 @@ For developers who want to build the `.exe` themselves.
 git clone https://github.com/zukrmn/BlockyMarketMaker.git
 cd BlockyMarketMaker
 
-# 2. Install project dependencies
-pip install -r requirements.txt
-
-# 3. Install PyInstaller
-pip install pyinstaller
-
-# 4. Build the executable
+# 2. Run the build script (installs dependencies automatically)
 build_exe.bat
 ```
+
+The script will:
+- Install all project dependencies
+- Install PyInstaller if not present
+- Build the executable
 
 Or build manually:
 ```bash
@@ -1231,15 +1230,14 @@ Para desenvolvedores que desejam compilar o `.exe`.
 git clone https://github.com/zukrmn/BlockyMarketMaker.git
 cd BlockyMarketMaker
 
-# 2. Instale as dependências
-pip install -r requirements.txt
-
-# 3. Instale o PyInstaller
-pip install pyinstaller
-
-# 4. Compile o executável
+# 2. Execute o script de build (instala dependências automaticamente)
 build_exe.bat
 ```
+
+O script irá:
+- Instalar todas as dependências do projeto
+- Instalar o PyInstaller se não estiver presente
+- Compilar o executável
 
 Ou compile manualmente:
 ```bash

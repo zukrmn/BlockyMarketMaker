@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
 PyInstaller spec file for BlockyMarketMaker
-Build with: pyinstaller blocky.spec
+Build with: pyinstaller blocky.spec --clean
 """
 
 import os
@@ -11,15 +11,6 @@ block_cipher = None
 
 # Get the base directory
 BASE_DIR = Path(SPECPATH)
-
-# Collect all source files
-src_files = []
-for root, dirs, files in os.walk(BASE_DIR / 'src'):
-    for file in files:
-        if file.endswith('.py'):
-            src_path = Path(root) / file
-            dest_path = Path(root).relative_to(BASE_DIR)
-            src_files.append((str(src_path), str(dest_path)))
 
 # Data files to include
 datas = [
@@ -33,11 +24,8 @@ datas = [
     # Images
     ('img', 'img'),
     
-    # Scripts
+    # Scripts (for setup wizard)
     ('scripts/gui_setup.py', 'scripts'),
-    
-    # Run script
-    ('run.py', '.'),
 ]
 
 # Filter out non-existent paths
@@ -49,17 +37,43 @@ a = Analysis(
     binaries=[],
     datas=datas,
     hiddenimports=[
+        # Async and web
+        'asyncio',
         'aiohttp',
+        'aiohttp.web',
+        'aiohttp.client',
+        'aiohttp.connector',
+        'aiohttp.http',
+        'aiohttp.http_websocket',
+        'aiohttp.http_parser',
         'aiohttp_jinja2',
         'jinja2',
+        'jinja2.ext',
+        
+        # Data handling
         'yaml',
+        'json',
         'dotenv',
-        'asyncio',
+        
+        # GUI
         'tkinter',
         'tkinter.ttk',
         'tkinter.messagebox',
         'tkinter.scrolledtext',
+        
+        # Networking
+        'ssl',
+        'certifi',
+        'charset_normalizer',
+        'multidict',
+        'yarl',
+        'async_timeout',
+        'aiosignal',
+        'frozenlist',
+        
         # All src modules
+        'main',
+        'config',
         'blocky',
         'blocky.async_client',
         'blocky.websocket',
@@ -67,18 +81,35 @@ a = Analysis(
         'spread_calculator',
         'metrics',
         'alerts',
-        'config',
         'health',
         'trading_helpers',
         'data_recorder',
         'dashboard',
         'dashboard.server',
         'dashboard.candles',
+        
+        # Standard library that might be missed
+        'logging',
+        'logging.handlers',
+        'queue',
+        'threading',
+        'concurrent.futures',
+        'typing',
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        # Exclude unnecessary modules to reduce size
+        'matplotlib',
+        'numpy',
+        'pandas',
+        'scipy',
+        'PIL',
+        'cv2',
+        'pytest',
+        'unittest',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -101,7 +132,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,  # Show console for logs
+    console=True,  # Show console for logs (can be False if only using GUI)
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
