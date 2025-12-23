@@ -52,8 +52,8 @@ echo [4/4] Building executable...
 if exist "dist" rmdir /s /q dist
 if exist "build" rmdir /s /q build
 
-REM Build the executable
-pyinstaller blocky.spec --clean --noconfirm
+REM Build the executable using python -m to avoid PATH issues
+python -m PyInstaller blocky.spec --clean --noconfirm
 
 if errorlevel 1 (
     echo.
