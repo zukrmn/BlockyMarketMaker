@@ -482,8 +482,8 @@
             // Create strategy lines
             const strategyColors = {
                 'SCARCITY': '#ff00ff',
-                'TICKER': '#00aaff',
-                'VWAP': '#00ff00',
+                'TICKER': '#00ff00',
+                'VWAP': '#00aaff',
                 'COMPOSITE': '#ffaa00'
             };
 
@@ -563,6 +563,46 @@
             }
         }
 
+        // Fetch strategy lines from API and update chart
+        async function fetchAndUpdateStrategyLines(market) {
+            try {
+                const response = await fetch(`/api/strategy/${market}`);
+                if (!response.ok) {
+                    console.warn('Failed to fetch strategy lines:', response.status);
+                    return;
+                }
+
+                const data = await response.json();
+                const newStrategies = data.strategy_lines || [];
+                const mid = data.mid_price || 50;
+
+                // Update each strategy line with new price
+                newStrategies.forEach(s => {
+                    if (strategyLines[s.name]) {
+                        const validPrice = getValidPrice(s.price, mid);
+                        strategyLines[s.name].applyOptions({
+                            price: validPrice,
+                            color: s.color
+                        });
+                        console.log(`Updated ${s.name} line to ${validPrice}`);
+                    }
+                });
+
+                // Update BID/ASK based on mid
+                const spread = 0.03; // 3% default
+                if (bidLine) {
+                    bidLine.applyOptions({ price: mid * (1 - spread / 2) });
+                }
+                if (askLine) {
+                    askLine.applyOptions({ price: mid * (1 + spread / 2) });
+                }
+
+                console.log('Strategy lines updated from API for', market);
+            } catch (error) {
+                console.error('Error fetching strategy lines:', error);
+            }
+        }
+
         // Initialize chart with server data (already real from API)
         // Server sends 4H candles by default, we use that initially
         candleSeries.setData(serverCandleData);
@@ -631,8 +671,8 @@
                     candleSeries.setData([]);
                 }
 
-                // Lines persist automatically - no need to recreate
-                updateLinePrices();
+                // Fetch fresh strategy lines from API to keep them in sync
+                await fetchAndUpdateStrategyLines(currentMarket);
             }
         });
 
@@ -660,9 +700,13 @@
                 order_book: "Livro de Ordens",
                 // Trade Log
                 trade_log: "Histórico de Trades",
+                no_trades_yet: "Nenhum trade ainda...",
                 // Footer
                 last_update: "Última atualização",
                 auto_refresh_disabled: "Auto-refresh desativado",
+                realtime_connected: "Conectado em tempo real",
+                realtime_disconnected: "Desconectado",
+                connecting: "Conectando...",
                 // Strategy Cards
                 confidence: "Confiança",
                 waiting_data: "Aguardando dados...",
@@ -693,9 +737,13 @@
                 order_book: "Order Book",
                 // Trade Log
                 trade_log: "Trade Log",
+                no_trades_yet: "No trades yet...",
                 // Footer
                 last_update: "Last update",
                 auto_refresh_disabled: "Auto-refresh disabled",
+                realtime_connected: "Connected in real-time",
+                realtime_disconnected: "Disconnected",
+                connecting: "Connecting...",
                 // Strategy Cards
                 confidence: "Confidence",
                 waiting_data: "Waiting for data...",
@@ -901,6 +949,9 @@
                     statusSpan.innerHTML = '🟢 <span data-i18n="realtime_connected">Conectado em tempo real</span>';
                     statusSpan.style.color = '#00ff00';
                 }
+
+                // Re-apply translations after updating HTML
+                applyTranslations();
             }
 
             function updateConnectionStatus(connected) {
