@@ -74,6 +74,9 @@ class MetricsTracker:
         self.orders_placed = 0
         self.orders_cancelled = 0
         
+        # Last processed trade ID to prevent duplicate counting
+        self.last_trade_id = None
+        
         # Try to load existing metrics
         self._load()
 
@@ -266,6 +269,7 @@ class MetricsTracker:
             'total_iron_received': self.total_iron_received,
             'orders_placed': self.orders_placed,
             'orders_cancelled': self.orders_cancelled,
+            'last_trade_id': self.last_trade_id,
             'last_saved': time.time()
         }
     
@@ -309,6 +313,7 @@ class MetricsTracker:
             self.total_iron_received = data.get('total_iron_received', 0.0)
             self.orders_placed = data.get('orders_placed', 0)
             self.orders_cancelled = data.get('orders_cancelled', 0)
+            self.last_trade_id = data.get('last_trade_id')
             
             logger.info(f"📂 Loaded metrics from {self.persistence_path} "
                        f"({len(self.trades)} trades, P&L: {self.get_realized_pnl():+.4f})")

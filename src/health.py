@@ -46,7 +46,7 @@ class HealthServer:
                 "status": "healthy",
                 "markets_count": len(self.bot.markets),
                 "markets": self.bot.markets,
-                "circuit_breaker": self.bot.client.circuit_breaker.state,
+                "circuit_breaker": self.bot.client.circuit_breaker.state.name if hasattr(self.bot.client.circuit_breaker.state, 'name') else str(self.bot.client.circuit_breaker.state),
                 "websocket_connected": self.bot.ws.running if self.bot.ws else False,
                 "metrics_healthy": self.bot.price_model.is_healthy(),
                 "realized_pnl": round(self.bot.metrics.get_realized_pnl(), 4),

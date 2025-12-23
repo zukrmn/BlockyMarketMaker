@@ -403,9 +403,12 @@
         const bidPrice = {{ bid_price }};
         const askPrice = {{ ask_price }};
 
+
         // Get current market from URL path (e.g., /dashboard/coal_iron -> coal_iron)
         const pathParts = window.location.pathname.split('/');
-        const currentMarket = pathParts[pathParts.length - 1] || 'diam_iron';
+        const urlMarket = pathParts[pathParts.length - 1];
+        // If URL ends with 'dashboard' (no market specified), use default
+        const currentMarket = (urlMarket && urlMarket !== 'dashboard' && urlMarket !== '') ? urlMarket : 'diam_iron';
         console.log('Current market:', currentMarket);
 
         // Timeframe configurations (matching BlockyCRAFT interface)
@@ -482,8 +485,8 @@
             // Create strategy lines
             const strategyColors = {
                 'SCARCITY': '#ff00ff',
-                'TICKER': '#00aaff',
-                'VWAP': '#00ff00',
+                'TICKER': '#00ff00',
+                'VWAP': '#00aaff',
                 'COMPOSITE': '#ffaa00'
             };
 
@@ -563,6 +566,46 @@
             }
         }
 
+        // Fetch strategy lines from API and update chart
+        async function fetchAndUpdateStrategyLines(market) {
+            try {
+                const response = await fetch(`/api/strategy/${market}`);
+                if (!response.ok) {
+                    console.warn('Failed to fetch strategy lines:', response.status);
+                    return;
+                }
+
+                const data = await response.json();
+                const newStrategies = data.strategy_lines || [];
+                const mid = data.mid_price || 50;
+
+                // Update each strategy line with new price
+                newStrategies.forEach(s => {
+                    if (strategyLines[s.name]) {
+                        const validPrice = getValidPrice(s.price, mid);
+                        strategyLines[s.name].applyOptions({
+                            price: validPrice,
+                            color: s.color
+                        });
+                        console.log(`Updated ${s.name} line to ${validPrice}`);
+                    }
+                });
+
+                // Update BID/ASK based on mid
+                const spread = 0.03; // 3% default
+                if (bidLine) {
+                    bidLine.applyOptions({ price: mid * (1 - spread / 2) });
+                }
+                if (askLine) {
+                    askLine.applyOptions({ price: mid * (1 + spread / 2) });
+                }
+
+                console.log('Strategy lines updated from API for', market);
+            } catch (error) {
+                console.error('Error fetching strategy lines:', error);
+            }
+        }
+
         // Initialize chart with server data (already real from API)
         // Server sends 4H candles by default, we use that initially
         candleSeries.setData(serverCandleData);
@@ -631,8 +674,8 @@
                     candleSeries.setData([]);
                 }
 
-                // Lines persist automatically - no need to recreate
-                updateLinePrices();
+                // Fetch fresh strategy lines from API to keep them in sync
+                await fetchAndUpdateStrategyLines(currentMarket);
             }
         });
 
@@ -660,9 +703,13 @@
                 order_book: "Livro de Ordens",
                 // Trade Log
                 trade_log: "Histórico de Trades",
+                no_trades_yet: "Nenhum trade ainda...",
                 // Footer
-                last_update: "Última atualização",
-                auto_refresh_disabled: "Auto-refresh desativado",
+                last_update: "Atualização",
+                auto_refresh_disabled: "Auto-refresh off",
+                realtime_connected: "Ao vivo",
+                realtime_disconnected: "Desconectado",
+                connecting: "Conectando...",
                 // Strategy Cards
                 confidence: "Confiança",
                 waiting_data: "Aguardando dados...",
@@ -693,9 +740,13 @@
                 order_book: "Order Book",
                 // Trade Log
                 trade_log: "Trade Log",
+                no_trades_yet: "No trades yet...",
                 // Footer
-                last_update: "Last update",
-                auto_refresh_disabled: "Auto-refresh disabled",
+                last_update: "Updated",
+                auto_refresh_disabled: "Auto-refresh off",
+                realtime_connected: "Live",
+                realtime_disconnected: "Disconnected",
+                connecting: "Connecting...",
                 // Strategy Cards
                 confidence: "Confidence",
                 waiting_data: "Waiting for data...",
@@ -853,6 +904,7 @@
 
                 ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
+                    updateConnectionStatus(false);  // Show disconnected on error
                 };
             }
 
@@ -900,6 +952,9 @@
                     statusSpan.innerHTML = '🟢 <span data-i18n="realtime_connected">Conectado em tempo real</span>';
                     statusSpan.style.color = '#00ff00';
                 }
+
+                // Re-apply translations after updating HTML
+                applyTranslations();
             }
 
             function updateConnectionStatus(connected) {

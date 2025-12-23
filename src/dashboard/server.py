@@ -36,8 +36,8 @@ class TradingDashboard:
     
     STRATEGY_COLORS = {
         "scarcity": "#ff00ff",
-        "ticker": "#00aaff", 
-        "vwap": "#00ff00",
+        "ticker": "#00ff00",
+        "vwap": "#00aaff",
         "composite": "#ffaa00",
     }
     
@@ -66,6 +66,7 @@ class TradingDashboard:
         self.app.router.add_get('/dashboard/{market}', self._dashboard_handler)
         self.app.router.add_get('/api/stats', self._api_stats)
         self.app.router.add_get('/api/candles/{market}', self._api_candles)
+        self.app.router.add_get('/api/strategy/{market}', self._api_strategy_lines)
         self.app.router.add_get('/ws', self._websocket_handler)  # WebSocket for real-time updates
         
         # Static files
@@ -214,9 +215,6 @@ class TradingDashboard:
                         logger.info(f"Last candle: {candles[-1]}")
                     return candles
                         
-        except Exception as e:
-            logger.exception(f"Exception fetching candles from API: {e}")
-        
         except Exception as e:
             logger.exception(f"Exception fetching candles from API: {e}")
         
@@ -442,7 +440,7 @@ class TradingDashboard:
             </div>'''
             
         if not trades:
-            html = '<div style="padding:10px;color:#666">No trades yet...</div>'
+            html = '<div style="padding:10px;color:#666" data-i18n="no_trades_yet">No trades yet...</div>'
             
         return html
     
@@ -489,10 +487,12 @@ class TradingDashboard:
                 color = self.STRATEGY_COLORS.get(s, "#ffffff")
                 strategy_lines.append({"name": s.upper(), "price": d.get('price', 0), "color": color})
         else:
-             # Fallback visual
+             # Fallback visual - All 4 strategies based on mid price
              strategy_lines = [
-                {"name": "Scarcity", "price": mid * 1.15, "color": self.STRATEGY_COLORS["scarcity"]},
-                {"name": "VWAP", "price": mid * 0.98, "color": self.STRATEGY_COLORS["vwap"]},
+                {"name": "SCARCITY", "price": mid * 1.02, "color": self.STRATEGY_COLORS["scarcity"]},
+                {"name": "TICKER", "price": mid, "color": self.STRATEGY_COLORS["ticker"]},
+                {"name": "VWAP", "price": mid * 0.99, "color": self.STRATEGY_COLORS["vwap"]},
+                {"name": "COMPOSITE", "price": mid, "color": self.STRATEGY_COLORS["composite"]},
              ]
 
         return {
@@ -535,6 +535,43 @@ class TradingDashboard:
             candles = []
         
         return web.json_response(candles)
+    
+    async def _api_strategy_lines(self, request: web.Request) -> web.Response:
+        """API endpoint for strategy lines data."""
+        market = request.match_info.get('market', 'diam_iron')
+        
+        # Get strategy data from bot metrics
+        strategy_lines = []
+        mid = 50.0  # Default
+        
+        if self.bot and hasattr(self.bot, 'metrics'):
+            metrics_stats = self.bot.metrics.market_stats.get(market, {})
+            mid = metrics_stats.get('mid_price', 50.0)
+            strat_prices = metrics_stats.get('strategy_prices', {})
+            
+            if strat_prices:
+                for s, d in strat_prices.items():
+                    color = self.STRATEGY_COLORS.get(s, "#ffffff")
+                    strategy_lines.append({
+                        "name": s.upper(), 
+                        "price": d.get('price', 0), 
+                        "color": color
+                    })
+        
+        # Fallback if no data
+        if not strategy_lines:
+            strategy_lines = [
+                {"name": "SCARCITY", "price": mid * 1.02, "color": self.STRATEGY_COLORS["scarcity"]},
+                {"name": "TICKER", "price": mid, "color": self.STRATEGY_COLORS["ticker"]},
+                {"name": "VWAP", "price": mid * 0.99, "color": self.STRATEGY_COLORS["vwap"]},
+                {"name": "COMPOSITE", "price": mid, "color": self.STRATEGY_COLORS["composite"]},
+            ]
+        
+        return web.json_response({
+            "market": market,
+            "mid_price": mid,
+            "strategy_lines": strategy_lines
+        })
     
     # === WebSocket for Real-Time Updates ===
     

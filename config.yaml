@@ -91,3 +91,11 @@ dynamic_spread:
 health:
   enabled: true                     # Set to false to disable health endpoint
   port: 8080                        # Port for health HTTP server
+
+# Desktop Notifications
+# Shows desktop notifications with sound when trades are executed
+notifications:
+  enabled: true                     # Set to false to disable all notifications
+  sound_enabled: true               # Set to false to disable notification sounds
+  notify_on_trade: true             # Notify when a trade is executed
+  notify_on_error: false            # Notify on critical errors
