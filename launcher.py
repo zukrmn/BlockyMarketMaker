@@ -123,6 +123,22 @@ class BotRunner:
         )
         self.btn_stop.pack(side=tk.LEFT, padx=5)
         
+        # Notifications toggle
+        self.notifications_var = tk.BooleanVar(value=True)
+        try:
+            from notifications import is_notifications_enabled
+            self.notifications_var.set(is_notifications_enabled())
+        except:
+            pass
+            
+        self.notifications_check = ttk.Checkbutton(
+            btn_frame,
+            text="🔔 Notifications",
+            variable=self.notifications_var,
+            command=self.toggle_notifications
+        )
+        self.notifications_check.pack(side=tk.LEFT, padx=10)
+        
         # Log area
         log_frame = ttk.Frame(self.root, padding=10)
         log_frame.pack(fill=tk.BOTH, expand=True)
@@ -264,6 +280,17 @@ class BotRunner:
         """Open dashboard in browser."""
         import webbrowser
         webbrowser.open("http://localhost:8081/dashboard")
+    
+    def toggle_notifications(self):
+        """Toggle notifications on/off."""
+        enabled = self.notifications_var.get()
+        try:
+            from notifications import set_notifications_enabled
+            set_notifications_enabled(enabled)
+            status = "enabled" if enabled else "disabled"
+            self.append_log(f"🔔 Notifications {status}\n")
+        except Exception as e:
+            self.append_log(f"Failed to toggle notifications: {e}\n")
     
     def reconfigure(self):
         """Open setup wizard for reconfiguration."""

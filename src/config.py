@@ -121,6 +121,14 @@ class CapitalAllocationConfig(BaseModel):
     priority_boost: float = 1.5        # 50% more allocation for priority markets
 
 
+class NotificationsConfig(BaseModel):
+    """Desktop notifications configuration."""
+    enabled: bool = True               # Enable/disable all notifications
+    sound_enabled: bool = True         # Enable/disable notification sounds
+    notify_on_trade: bool = True       # Notify when a trade is executed
+    notify_on_error: bool = False      # Notify on critical errors
+
+
 class Config(BaseSettings):
     """
     Main configuration container with environment variable support.
@@ -144,6 +152,7 @@ class Config(BaseSettings):
     health: HealthConfig = Field(default_factory=HealthConfig)
     strategy: StrategyConfig = Field(default_factory=StrategyConfig)
     capital_allocation: CapitalAllocationConfig = Field(default_factory=CapitalAllocationConfig)
+    notifications: NotificationsConfig = Field(default_factory=NotificationsConfig)
 
     model_config = {
         "extra": "ignore"

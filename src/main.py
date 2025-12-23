@@ -24,6 +24,7 @@ from trading_helpers import (
     diff_orders
 )
 from data_recorder import DataRecorder
+from notifications import notify_trade
 
 
 # Load environment variables from .env file
@@ -468,6 +469,13 @@ class MarketMaker:
                 if price > 0 and quantity > 0:
                     self.metrics.record_trade(market, side, price, quantity)
                     logger.info(f"📈 Recorded fill: {side.upper()} {quantity:.2f} {market} @ {price:.2f}")
+                    
+                    # Send desktop notification with sound
+                    try:
+                        pnl = self.metrics.get_realized_pnl()
+                        notify_trade(side, market, quantity, price, pnl)
+                    except Exception as e:
+                        logger.debug(f"Notification failed: {e}")
                 
                 # Update cursor to latest trade and save
                 if trade_id:
