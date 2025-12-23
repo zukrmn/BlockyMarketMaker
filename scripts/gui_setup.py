@@ -54,13 +54,13 @@ class SetupWizard:
         # Center window
         self.center_window()
         
-        # Main container
-        self.main_frame = ttk.Frame(root, padding=20)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        # Main container - use pack for vertical layout
+        self.outer_frame = ttk.Frame(root)
+        self.outer_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Progress indicator
-        self.progress_frame = ttk.Frame(self.main_frame)
-        self.progress_frame.pack(fill=tk.X, pady=(0, 20))
+        # Progress indicator (fixed at top)
+        self.progress_frame = ttk.Frame(self.outer_frame, padding=(20, 15, 20, 10))
+        self.progress_frame.pack(fill=tk.X)
         
         self.steps = ["API Config", "Trading", "Markets", "Confirm"]
         self.step_labels = []
@@ -69,22 +69,62 @@ class SetupWizard:
             lbl.pack(side=tk.LEFT, expand=True)
             self.step_labels.append(lbl)
         
-        # Content frame
-        self.content_frame = ttk.Frame(self.main_frame)
-        self.content_frame.pack(fill=tk.BOTH, expand=True)
+        ttk.Separator(self.outer_frame, orient=tk.HORIZONTAL).pack(fill=tk.X)
         
-        # Navigation buttons
-        self.nav_frame = ttk.Frame(self.main_frame)
-        self.nav_frame.pack(fill=tk.X, pady=(20, 0))
+        # Scrollable content area
+        self.canvas_frame = ttk.Frame(self.outer_frame)
+        self.canvas_frame.pack(fill=tk.BOTH, expand=True)
         
-        self.btn_back = ttk.Button(self.nav_frame, text="Back", command=self.prev_step)
+        self.canvas = tk.Canvas(self.canvas_frame, highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self.canvas_frame, orient=tk.VERTICAL, command=self.canvas.yview)
+        
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Content frame inside canvas
+        self.content_frame = ttk.Frame(self.canvas, padding=20)
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.content_frame, anchor=tk.NW)
+        
+        # Update scroll region when content changes
+        self.content_frame.bind("<Configure>", self._on_content_configure)
+        self.canvas.bind("<Configure>", self._on_canvas_configure)
+        
+        # Enable mouse wheel scrolling
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        self.canvas.bind_all("<Button-4>", self._on_mousewheel)
+        self.canvas.bind_all("<Button-5>", self._on_mousewheel)
+        
+        ttk.Separator(self.outer_frame, orient=tk.HORIZONTAL).pack(fill=tk.X)
+        
+        # Navigation buttons (fixed footer)
+        self.nav_frame = ttk.Frame(self.outer_frame, padding=(20, 15))
+        self.nav_frame.pack(fill=tk.X, side=tk.BOTTOM)
+        
+        self.btn_back = ttk.Button(self.nav_frame, text="← Back", command=self.prev_step)
         self.btn_back.pack(side=tk.LEFT)
         
-        self.btn_next = ttk.Button(self.nav_frame, text="Next", command=self.next_step)
+        self.btn_next = ttk.Button(self.nav_frame, text="Next →", command=self.next_step)
         self.btn_next.pack(side=tk.RIGHT)
         
         # Show first step
         self.show_step(0)
+    
+    def _on_content_configure(self, event):
+        """Update scroll region when content changes."""
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+    
+    def _on_canvas_configure(self, event):
+        """Adjust content frame width when canvas is resized."""
+        self.canvas.itemconfig(self.canvas_window, width=event.width)
+    
+    def _on_mousewheel(self, event):
+        """Handle mouse wheel scrolling."""
+        if event.num == 4 or event.delta > 0:
+            self.canvas.yview_scroll(-1, "units")
+        elif event.num == 5 or event.delta < 0:
+            self.canvas.yview_scroll(1, "units")
     
     def center_window(self):
         """Center the window on screen."""
@@ -116,9 +156,12 @@ class SetupWizard:
         self.clear_content()
         self.update_progress()
         
+        # Reset scroll to top
+        self.canvas.yview_moveto(0)
+        
         # Update button states
         self.btn_back.configure(state=tk.NORMAL if step > 0 else tk.DISABLED)
-        self.btn_next.configure(text="Finish" if step == len(self.steps) - 1 else "Next")
+        self.btn_next.configure(text="Finish ✓" if step == len(self.steps) - 1 else "Next →")
         
         # Show step content
         if step == 0:
