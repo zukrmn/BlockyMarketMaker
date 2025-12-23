@@ -853,6 +853,7 @@
 
                 ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
+                    updateConnectionStatus(false);  // Show disconnected on error
                 };
             }
 

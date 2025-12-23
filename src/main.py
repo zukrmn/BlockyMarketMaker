@@ -116,8 +116,7 @@ class MarketMaker:
             min_level=AlertLevel.WARNING
         )
         
-        # Trade tracking for metrics
-        self.last_trade_cursor = None  # Track last processed trade ID
+        # Note: Trade cursor is now persisted in self.metrics.last_trade_id
         
         # Dynamic Spread Calculator
         spread_config = SpreadConfig(
@@ -453,7 +452,7 @@ class MarketMaker:
                 trade_id = trade.get("id") or trade.get("trade_id")
                 
                 # Skip if we've already processed this trade
-                if self.last_trade_cursor and trade_id and trade_id <= self.last_trade_cursor:
+                if self.metrics.last_trade_id and trade_id and trade_id <= self.metrics.last_trade_id:
                     continue
                 
                 new_trades.append(trade)
@@ -470,10 +469,11 @@ class MarketMaker:
                     self.metrics.record_trade(market, side, price, quantity)
                     logger.info(f"📈 Recorded fill: {side.upper()} {quantity:.2f} {market} @ {price:.2f}")
                 
-                # Update cursor to latest trade
+                # Update cursor to latest trade and save
                 if trade_id:
-                    if not self.last_trade_cursor or trade_id > self.last_trade_cursor:
-                        self.last_trade_cursor = trade_id
+                    if not self.metrics.last_trade_id or trade_id > self.metrics.last_trade_id:
+                        self.metrics.last_trade_id = trade_id
+                        self.metrics.save()  # Persist the cursor immediately
             
             if new_trades:
                 logger.info(f"Processed {len(new_trades)} new trade(s)")
