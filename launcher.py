@@ -53,18 +53,34 @@ def needs_setup() -> bool:
 
 def load_env_file():
     """Load .env file into os.environ manually (no dotenv dependency)."""
-    env_path = get_base_path() / ".env"
-    
-    print(f"[ENV] Looking for .env at: {env_path}")
-    print(f"[ENV] File exists: {env_path.exists()}")
-    
-    if not env_path.exists():
-        print(f"[ENV] ERROR: .env file not found!")
-        return False
-    
-    loaded_keys = []
-    with open(env_path, "r", encoding="utf-8") as f:
-        for line in f:
+    try:
+        env_path = get_base_path() / ".env"
+        
+        print(f"[ENV] Base path: {get_base_path()}")
+        print(f"[ENV] Looking for .env at: {env_path}")
+        print(f"[ENV] File exists: {env_path.exists()}")
+        
+        if not env_path.exists():
+            print(f"[ENV] ERROR: .env file not found!")
+            return False
+        
+        # Try reading with different encodings (Windows BOM issue)
+        content = None
+        for encoding in ['utf-8-sig', 'utf-8', 'latin-1']:
+            try:
+                with open(env_path, "r", encoding=encoding) as f:
+                    content = f.read()
+                print(f"[ENV] Read file with encoding: {encoding}")
+                break
+            except UnicodeDecodeError:
+                continue
+        
+        if content is None:
+            print("[ENV] ERROR: Could not read .env file with any encoding")
+            return False
+        
+        loaded_keys = []
+        for line in content.splitlines():
             line = line.strip()
             # Skip empty lines and comments
             if not line or line.startswith("#"):
@@ -75,14 +91,25 @@ def load_env_file():
                 key = key.strip()
                 value = value.strip()
                 # Remove quotes if present
-                if value and value[0] in ('"', "'") and value[-1] == value[0]:
+                if value and len(value) >= 2 and value[0] in ('"', "'") and value[-1] == value[0]:
                     value = value[1:-1]
                 os.environ[key] = value
                 loaded_keys.append(key)
-    
-    print(f"[ENV] Loaded {len(loaded_keys)} variables: {loaded_keys}")
-    print(f"[ENV] BLOCKY_API_KEY set: {'BLOCKY_API_KEY' in os.environ}")
-    return True
+        
+        print(f"[ENV] Loaded {len(loaded_keys)} variables: {loaded_keys}")
+        
+        # Verify BLOCKY_API_KEY
+        api_key = os.environ.get('BLOCKY_API_KEY', '')
+        print(f"[ENV] BLOCKY_API_KEY set: {bool(api_key)}")
+        print(f"[ENV] BLOCKY_API_KEY length: {len(api_key)}")
+        
+        return bool(api_key)
+        
+    except Exception as e:
+        print(f"[ENV] EXCEPTION: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return False
 
 
 class LogCapture:
