@@ -4,6 +4,7 @@ Modular server implementation with template rendering
 """
 import logging
 import os
+import sys
 import time
 import json
 import random
