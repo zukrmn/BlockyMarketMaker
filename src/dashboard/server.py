@@ -22,12 +22,27 @@ logger = logging.getLogger(__name__)
 # API endpoint for OHLCV data
 API_BASE_URL = "https://craft.blocky.com.br/api/v1"
 
-# Get paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Get paths - handle PyInstaller frozen mode
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled exe - use _MEIPASS for bundled files
+        base = sys._MEIPASS
+    else:
+        # Running as script
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, relative_path)
+
+# For PyInstaller, resources are at _MEIPASS/src/dashboard/...
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.join(sys._MEIPASS, 'src', 'dashboard')
+    PROJECT_ROOT = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
+
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
-# img folder is at project root: /workspaces/BlockyMarketMaker/img
-PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
 IMG_DIR = os.path.join(PROJECT_ROOT, 'img')
 
 
