@@ -212,3 +212,9 @@ def get_config() -> Config:
     if _config is None:
         _config = load_config()
     return _config
+
+
+def reset_config():
+    """Reset the global config cache. Call this after setting environment variables."""
+    global _config
+    _config = None

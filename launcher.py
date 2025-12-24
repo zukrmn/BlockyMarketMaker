@@ -254,6 +254,11 @@ class BotRunner:
                 # Load environment variables from .env file
                 load_env_file()
                 
+                # Reset config cache so it reloads with new env vars
+                from config import reset_config
+                reset_config()
+                print("[ENV] Config cache reset")
+                
                 # Import here to ensure paths are set
                 from main import main
                 
