@@ -51,6 +51,29 @@ def needs_setup() -> bool:
     return False
 
 
+def load_env_file():
+    """Load .env file into os.environ manually (no dotenv dependency)."""
+    env_path = get_base_path() / ".env"
+    if not env_path.exists():
+        return
+    
+    with open(env_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            # Skip empty lines and comments
+            if not line or line.startswith("#"):
+                continue
+            # Parse KEY=VALUE
+            if "=" in line:
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip()
+                # Remove quotes if present
+                if value and value[0] in ('"', "'") and value[-1] == value[0]:
+                    value = value[1:-1]
+                os.environ[key] = value
+
+
 class LogCapture:
     """Capture stdout/stderr and send to queue."""
     
@@ -190,6 +213,9 @@ class BotRunner:
             sys.stderr = LogCapture(self.log_queue, original_stderr)
             
             try:
+                # Load environment variables from .env file
+                load_env_file()
+                
                 # Import here to ensure paths are set
                 from main import main
                 
