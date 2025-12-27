@@ -37,7 +37,9 @@ def get_resource_path(relative_path):
 # For PyInstaller, resources are at _MEIPASS/src/dashboard/...
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.join(sys._MEIPASS, 'src', 'dashboard')
-    PROJECT_ROOT = sys._MEIPASS
+    # PROJECT_ROOT should be where the .exe is, for config files
+    PROJECT_ROOT = os.path.dirname(sys.executable)
+    logger.info(f"Running in frozen mode. PROJECT_ROOT: {PROJECT_ROOT}")
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))

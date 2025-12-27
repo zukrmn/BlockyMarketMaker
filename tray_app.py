@@ -12,8 +12,14 @@ import webbrowser
 from pathlib import Path
 
 # Add src to path BEFORE any imports
-BASE_DIR = Path(__file__).parent
-SRC_DIR = BASE_DIR / "src"
+# In frozen mode (PyInstaller), use executable directory for config files
+if getattr(sys, 'frozen', False):
+    BASE_DIR = Path(sys.executable).parent
+    SRC_DIR = Path(sys._MEIPASS) / "src"
+else:
+    BASE_DIR = Path(__file__).parent
+    SRC_DIR = BASE_DIR / "src"
+
 sys.path.insert(0, str(SRC_DIR))
 sys.path.insert(0, str(BASE_DIR))
 
