@@ -153,6 +153,41 @@ class BlockyTrayApp:
         print(f"Server not ready after {timeout}s")
         return False
     
+    def start_dashboard_only(self):
+        """Start only the dashboard server (for setup wizard)."""
+        def run_dashboard():
+            """Run dashboard server in asyncio event loop."""
+            try:
+                self.loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self.loop)
+                
+                # Import dashboard server
+                from dashboard.server import TradingDashboard
+                
+                self.running = True
+                dashboard = TradingDashboard(bot=None, port=8081)
+                
+                async def serve():
+                    await dashboard.start()
+                    print("Dashboard server started on http://localhost:8081")
+                    # Keep running
+                    while self.running:
+                        await asyncio.sleep(1)
+                
+                self.loop.run_until_complete(serve())
+            except Exception as e:
+                print(f"Dashboard error: {e}")
+                import traceback
+                traceback.print_exc()
+            finally:
+                self.running = False
+                if self.loop:
+                    self.loop.close()
+        
+        self.bot_thread = threading.Thread(target=run_dashboard, daemon=True)
+        self.bot_thread.start()
+        print("Dashboard-only mode started")
+    
     def stop_bot(self):
         """Stop the bot gracefully."""
         if not self.running:
@@ -215,20 +250,25 @@ class BlockyTrayApp:
         """Main entry point."""
         print("BlockyMarketMaker starting...")
         
-        # Start bot first
-        self.start_bot()
-        
-        # Wait for server to be ready
-        server_ready = self.wait_for_server("http://localhost:8081/api/stats", timeout=30)
-        
-        if not server_ready:
-            print("WARNING: Server did not start in time. Try refreshing browser manually.")
-        
-        # Check if setup is needed and open appropriate page
+        # Check if setup is needed
         if self.needs_setup():
-            print("First-time setup required. Opening setup wizard...")
-            webbrowser.open(self.SETUP_URL)
+            print("First-time setup required. Starting dashboard-only mode...")
+            # Start dashboard without full bot (for setup wizard)
+            self.start_dashboard_only()
+            # Wait for dashboard server
+            server_ready = self.wait_for_server("http://localhost:8081/api/needs-setup", timeout=15)
+            if server_ready:
+                print("Opening setup wizard...")
+                webbrowser.open(self.SETUP_URL)
+            else:
+                print("ERROR: Dashboard failed to start. Check console for errors.")
         else:
+            # Start full bot with dashboard
+            self.start_bot()
+            # Wait for server to be ready
+            server_ready = self.wait_for_server("http://localhost:8081/api/stats", timeout=30)
+            if not server_ready:
+                print("WARNING: Server did not start in time. Try refreshing browser manually.")
             print("Opening dashboard...")
             webbrowser.open(self.DASHBOARD_URL)
         
