@@ -1,9 +1,12 @@
 """
 Dynamic spread calculator for the Market Maker bot.
 Calculates optimal spreads based on volatility, inventory position, and competition.
+Supports per-market spread overrides from market_profiles.yaml.
 """
 import logging
+import os
 import time
+import yaml
 from typing import Dict, Tuple, Optional
 from dataclasses import dataclass
 from collections import deque
@@ -55,6 +58,30 @@ class SpreadCalculator:
         # Price history for quick volatility estimates
         self._price_history: Dict[str, deque] = {}
         self._max_history = 100
+        
+        # Load market profiles for per-market spread overrides
+        self._market_profiles: Dict[str, dict] = {}
+        self._load_market_profiles()
+    
+    def _load_market_profiles(self) -> None:
+        """Load market profiles from YAML file for per-market spreads."""
+        try:
+            profiles_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), 
+                'market_profiles.yaml'
+            )
+            if os.path.exists(profiles_path):
+                with open(profiles_path, 'r') as f:
+                    profiles = yaml.safe_load(f) or {}
+                    # Filter out non-market keys (like _strategy_notes)
+                    self._market_profiles = {
+                        k: v for k, v in profiles.items() 
+                        if not k.startswith('_') and isinstance(v, dict)
+                    }
+                logger.info(f"Loaded {len(self._market_profiles)} market profiles for spread customization")
+        except Exception as e:
+            logger.warning(f"Failed to load market profiles: {e}")
+            self._market_profiles = {}
         
     async def calculate_volatility(self, market: str) -> float:
         """
@@ -232,8 +259,14 @@ class SpreadCalculator:
             # Return fixed spread if dynamic is disabled
             return (self.config.base_spread, self.config.base_spread)
         
-        # 1. Base spread
-        base = self.config.base_spread
+        # 1. Base spread - Check market profile for override
+        profile = self._market_profiles.get(market, {})
+        if 'target_spread' in profile:
+            # Use market-specific spread from profile
+            base = profile['target_spread']
+            logger.debug(f"{market}: Using profile target_spread={base:.2%}")
+        else:
+            base = self.config.base_spread
         
         # 2. Volatility adjustment
         if use_cache:
@@ -256,7 +289,7 @@ class SpreadCalculator:
         
         logger.debug(
             f"{market}: Dynamic spread - buy={buy_spread:.2%}, sell={sell_spread:.2%} "
-            f"(vol={vol:.2f}, inv_adj=({buy_inv_adj:+.3f}, {sell_inv_adj:+.3f}))"
+            f"(base={base:.2%}, vol={vol:.2f}, inv_adj=({buy_inv_adj:+.3f}, {sell_inv_adj:+.3f}))"
         )
         
         return (buy_spread, sell_spread)

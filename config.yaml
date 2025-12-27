@@ -13,11 +13,11 @@ trading:
   enabled_markets: []             # Whitelist: empty = all markets, otherwise only these
   disabled_markets: []            # Blacklist: never trade these
   # Example: disabled_markets: [sand_iron, dirt_iron]
-  spread: 0.05                    # 5% spread (0.05 = 5%)
+  spread: 0.10                    # 5% spread (0.05 = 5%)
   min_spread_ticks: 0.01          # Minimum spread in price units
   target_value: 5.0               # Fallback target value (used if dynamic allocation disabled)
   max_quantity: 6400              # Maximum order quantity
-  refresh_interval: 60            # Seconds between integrity checks
+  refresh_interval: 30            # Seconds between integrity checks (reduced for faster response)
 
 # Dynamic Capital Allocation (Portfolio Management)
 capital_allocation:
@@ -79,11 +79,11 @@ price_model:
 # Spread is calculated as: base_spread + volatility_adj + inventory_adj
 dynamic_spread:
   enabled: true                     # Set to false to use fixed spread from trading.spread
-  base_spread: 0.03                 # 3% base spread
-  volatility_multiplier: 2.0        # Higher = more sensitive to volatility
+  base_spread: 0.05                 # 5% base spread (reduced from 10%)
+  volatility_multiplier: 3.0        # Higher = more sensitive to volatility
   inventory_impact: 0.02            # Max spread adjustment from inventory imbalance
   min_spread: 0.01                  # 1% minimum spread
-  max_spread: 0.15                  # 15% maximum spread
+  max_spread: 0.25                  # 15% maximum spread
   volatility_window: 24             # Hours of OHLCV data to consider
 
 # Health Endpoint

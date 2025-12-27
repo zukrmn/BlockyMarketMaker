@@ -26,5 +26,9 @@ prometheus-client>=0.19.0
 aiohttp-jinja2>=1.5.0
 jinja2>=3.1.0
 
+# System Tray (Windows/macOS/Linux)
+pystray>=0.19.0
+Pillow>=10.0.0
+
 # Development (optional - for building Windows executable)
 # pyinstaller>=6.0.0

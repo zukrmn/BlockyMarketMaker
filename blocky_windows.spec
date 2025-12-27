@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-PyInstaller spec file for BlockyMarketMaker
-Build with: pyinstaller blocky.spec --clean
+PyInstaller spec file for BlockyMarketMaker Windows distribution.
+Build with: pyinstaller blocky_windows.spec --clean
 """
 
 import os
@@ -16,23 +16,21 @@ BASE_DIR = Path(SPECPATH)
 datas = [
     # Config template
     ('config.yaml', '.'),
+    ('market_profiles.yaml', '.'),
     
     # Dashboard templates and static files
     ('src/dashboard/templates', 'src/dashboard/templates'),
     ('src/dashboard/static', 'src/dashboard/static'),
     
-    # Images
+    # Images for tray icon
     ('img', 'img'),
-    
-    # Scripts (for setup wizard)
-    ('scripts/gui_setup.py', 'scripts'),
 ]
 
 # Filter out non-existent paths
 datas = [(src, dst) for src, dst in datas if Path(BASE_DIR / src).exists()]
 
 a = Analysis(
-    ['launcher.py'],
+    ['tray_app.py'],
     pathex=[str(BASE_DIR), str(BASE_DIR / 'src')],
     binaries=[],
     datas=datas,
@@ -55,11 +53,12 @@ a = Analysis(
         'json',
         'dotenv',
         
-        # GUI
-        'tkinter',
-        'tkinter.ttk',
-        'tkinter.messagebox',
-        'tkinter.scrolledtext',
+        # System Tray
+        'pystray',
+        'pystray._win32',
+        'PIL',
+        'PIL.Image',
+        'PIL.ImageDraw',
         
         # Networking
         'ssl',
@@ -83,18 +82,21 @@ a = Analysis(
         'alerts',
         'health',
         'trading_helpers',
+        'capital_allocator',
         'data_recorder',
+        'notifications',
         'dashboard',
         'dashboard.server',
         'dashboard.candles',
         
-        # Standard library that might be missed
+        # Standard library
         'logging',
         'logging.handlers',
         'queue',
         'threading',
         'concurrent.futures',
         'typing',
+        'webbrowser',
     ],
     hookspath=[],
     hooksconfig={},
@@ -105,10 +107,10 @@ a = Analysis(
         'numpy',
         'pandas',
         'scipy',
-        'PIL',
         'cv2',
         'pytest',
         'unittest',
+        'tkinter',  # Not needed anymore
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -132,11 +134,11 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,  # Show console for logs (can be False if only using GUI)
+    console=False,  # NO CONSOLE - clean Windows app
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    # icon='img/icon.ico',  # Uncomment if you have an icon
+    icon='img/icon.ico' if Path(BASE_DIR / 'img' / 'icon.ico').exists() else None,
 )

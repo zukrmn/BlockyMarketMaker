@@ -1,9 +1,9 @@
 @echo off
-REM Build script for BlockyMarketMaker Windows executable
+REM Build script for BlockyMarketMaker Windows executable (System Tray version)
 REM Run this from the project root directory
 
 echo ========================================
-echo BlockyMarketMaker Build Script
+echo BlockyMarketMaker Windows Build
 echo ========================================
 echo.
 
@@ -17,7 +17,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/4] Checking Python version...
+echo [1/5] Checking Python version...
 python -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)" 2>nul
 if errorlevel 1 (
     echo WARNING: Python 3.11+ is recommended
@@ -28,7 +28,7 @@ if errorlevel 1 (
 
 REM Install project dependencies
 echo.
-echo [2/4] Installing project dependencies...
+echo [2/5] Installing project dependencies...
 pip install -r requirements.txt
 if errorlevel 1 (
     echo ERROR: Failed to install dependencies
@@ -38,7 +38,7 @@ if errorlevel 1 (
 
 REM Install/upgrade PyInstaller
 echo.
-echo [3/4] Installing PyInstaller...
+echo [3/5] Installing PyInstaller...
 pip install --upgrade pyinstaller
 if errorlevel 1 (
     echo ERROR: Failed to install PyInstaller
@@ -48,12 +48,14 @@ if errorlevel 1 (
 
 REM Clean previous build
 echo.
-echo [4/4] Building executable...
+echo [4/5] Cleaning previous build...
 if exist "dist" rmdir /s /q dist
 if exist "build" rmdir /s /q build
 
-REM Build the executable using python -m to avoid PATH issues
-python -m PyInstaller blocky.spec --clean --noconfirm
+REM Build the executable
+echo.
+echo [5/5] Building executable...
+python -m PyInstaller blocky_windows.spec --clean --noconfirm
 
 if errorlevel 1 (
     echo.
@@ -77,11 +79,11 @@ echo ========================================
 echo.
 echo Executable location: dist\BlockyMarketMaker.exe
 echo.
-echo To test:
-echo   1. Open the dist folder
-echo   2. Copy config.yaml to dist folder (optional)
-echo   3. Double-click BlockyMarketMaker.exe
-echo   4. Complete the setup wizard
+echo Features:
+echo   - No console window (clean!)
+echo   - System tray icon for control
+echo   - Dashboard opens in browser automatically
+echo   - Setup wizard on first run
 echo.
 echo To distribute:
 echo   - Users only need BlockyMarketMaker.exe

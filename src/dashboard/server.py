@@ -78,6 +78,9 @@ class TradingDashboard:
         
         # Routes
         self.app.router.add_get('/', self._redirect)
+        self.app.router.add_get('/setup', self._setup_handler)
+        self.app.router.add_get('/api/needs-setup', self._api_needs_setup)
+        self.app.router.add_post('/api/setup', self._api_save_setup)
         self.app.router.add_get('/dashboard', self._dashboard_handler)
         self.app.router.add_get('/dashboard/{market}', self._dashboard_handler)
         self.app.router.add_get('/api/stats', self._api_stats)
@@ -651,6 +654,92 @@ class TradingDashboard:
         
         # Clean up disconnected clients
         self.ws_clients -= disconnected
+    
+    # === Setup Wizard Handlers ===
+    
+    @aiohttp_jinja2.template('setup.html')
+    async def _setup_handler(self, request: web.Request) -> dict:
+        """Render setup wizard page."""
+        return {}
+    
+    async def _api_needs_setup(self, request: web.Request) -> web.Response:
+        """Check if setup is needed."""
+        env_path = os.path.join(PROJECT_ROOT, '.env')
+        needs_setup = True
+        
+        if os.path.exists(env_path):
+            with open(env_path, 'r') as f:
+                content = f.read()
+                if 'BLOCKY_API_KEY=' in content:
+                    for line in content.splitlines():
+                        if line.startswith('BLOCKY_API_KEY='):
+                            key = line.split('=', 1)[1].strip()
+                            if key and key not in ('""', "''", ''):
+                                needs_setup = False
+                            break
+        
+        return web.json_response({"needs_setup": needs_setup})
+    
+    async def _api_save_setup(self, request: web.Request) -> web.Response:
+        """Save setup configuration."""
+        try:
+            data = await request.json()
+            
+            # Validate required fields
+            api_key = data.get('api_key', '').strip()
+            if not api_key:
+                return web.json_response({"error": "API Key is required"}, status=400)
+            
+            # Save .env file
+            env_path = os.path.join(PROJECT_ROOT, '.env')
+            env_lines = [f"BLOCKY_API_KEY={api_key}"]
+            
+            webhook_url = data.get('webhook_url', '').strip()
+            if webhook_url:
+                env_lines.append(f"ALERT_WEBHOOK_URL={webhook_url}")
+                env_lines.append("ALERT_WEBHOOK_TYPE=discord")
+            
+            with open(env_path, 'w') as f:
+                f.write('\n'.join(env_lines) + '\n')
+            
+            # Update config.yaml
+            config_path = os.path.join(PROJECT_ROOT, 'config.yaml')
+            config = {}
+            
+            if os.path.exists(config_path):
+                import yaml
+                with open(config_path, 'r') as f:
+                    config = yaml.safe_load(f) or {}
+            
+            # Update trading settings
+            if 'trading' not in config:
+                config['trading'] = {}
+            
+            config['trading']['dry_run'] = data.get('dry_run', True)
+            config['trading']['target_value'] = data.get('target_value', 10.0)
+            
+            enabled_markets = data.get('enabled_markets', [])
+            if enabled_markets:
+                config['trading']['enabled_markets'] = enabled_markets
+            elif 'enabled_markets' in config['trading']:
+                del config['trading']['enabled_markets']
+            
+            # Update spread settings
+            if 'dynamic_spread' not in config:
+                config['dynamic_spread'] = {}
+            
+            config['dynamic_spread']['base_spread'] = round(data.get('base_spread', 0.05), 4)
+            
+            import yaml
+            with open(config_path, 'w') as f:
+                yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+            
+            logger.info("Setup configuration saved successfully")
+            return web.json_response({"success": True})
+            
+        except Exception as e:
+            logger.error(f"Setup save error: {e}")
+            return web.json_response({"error": str(e)}, status=500)
 
 
 # Backward compatibility aliases
