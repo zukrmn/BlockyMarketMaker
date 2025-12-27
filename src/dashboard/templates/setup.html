@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockyMarketMaker - Setup</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --border: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: var(--accent);
+            width: 30px;
+            border-radius: 5px;
+        }
+
+        .step-dot.completed {
+            background: var(--success);
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .label-hint {
+            font-weight: 400;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+
+        .slider-group {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .slider-value {
+            background: var(--accent);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .market-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .market-item:hover {
+            background: #252525;
+        }
+
+        .market-item.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--accent);
+        }
+
+        .market-item input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #252525;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            font-weight: 600;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 500px) {
+            .market-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🟦 BlockyMarketMaker</h1>
+            <p>Setup Wizard</p>
+        </div>
+
+        <div class="steps">
+            <div class="step-dot active" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+            <div class="step-dot" data-step="3"></div>
+            <div class="step-dot" data-step="4"></div>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+
+        <!-- Step 1: API Configuration -->
+        <div class="step-content active" id="step-1">
+            <h2>API Configuration</h2>
+            <p class="description">
+                Enter your Blocky API key. You can find it at
+                <a href="https://craft.blocky.com.br" target="_blank"
+                    style="color: var(--accent)">craft.blocky.com.br</a>
+            </p>
+
+            <div class="form-group">
+                <label>API Key <span class="label-hint">(required)</span></label>
+                <input type="password" id="api_key" placeholder="Enter your API key">
+            </div>
+
+            <div class="form-group">
+                <label>Discord Webhook <span class="label-hint">(optional)</span></label>
+                <input type="text" id="webhook_url" placeholder="https://discord.com/api/webhooks/...">
+            </div>
+        </div>
+
+        <!-- Step 2: Trading Parameters -->
+        <div class="step-content" id="step-2">
+            <h2>Trading Parameters</h2>
+            <p class="description">
+                Configure your trading strategy. Start conservative and adjust as you learn.
+            </p>
+
+            <div class="form-group">
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span>Base Spread (Profit Margin)</span>
+                        <span class="slider-value" id="spread-value">5%</span>
+                    </div>
+                    <input type="range" id="base_spread" min="1" max="15" value="5" step="0.5">
+                    <small style="color: var(--text-secondary)">Higher = more profit per trade, but fewer trades</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span>Order Size (Iron)</span>
+                        <span class="slider-value" id="target-value">10 Iron</span>
+                    </div>
+                    <input type="range" id="target_value" min="5" max="100" value="10" step="5">
+                    <small style="color: var(--text-secondary)">Start small while learning</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-group">
+                    <input type="checkbox" id="dry_run" checked>
+                    <div>
+                        <strong>Dry Run Mode</strong>
+                        <div style="font-size: 13px; color: var(--text-secondary)">Simulate without real orders
+                            (recommended for first run)</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Step 3: Market Selection -->
+        <div class="step-content" id="step-3">
+            <h2>Market Selection</h2>
+            <p class="description">
+                Choose which markets to trade. Start with a few and expand gradually.
+            </p>
+
+            <div class="form-group">
+                <label class="checkbox-group" style="margin-bottom: 16px">
+                    <input type="checkbox" id="all_markets">
+                    <div>
+                        <strong>Trade ALL Markets</strong>
+                        <div style="font-size: 13px; color: var(--text-secondary)">For experienced users</div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="market-grid" id="market-grid">
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="diam_iron" checked>
+                    <span>💎 Diamond</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="gold_iron" checked>
+                    <span>🪙 Gold</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="lapi_iron">
+                    <span>💙 Lapis</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="slme_iron">
+                    <span>🟢 Slime</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="coal_iron">
+                    <span>⬛ Coal</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="obsn_iron">
+                    <span>🟣 Obsidian</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="olog_iron">
+                    <span>🪵 Oak Log</span>
+                </label>
+                <label class="market-item">
+                    <input type="checkbox" name="market" value="ston_iron">
+                    <span>🪨 Stone</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Step 4: Confirmation -->
+        <div class="step-content" id="step-4">
+            <h2>Confirm Configuration</h2>
+            <p class="description">
+                Review your settings before starting the bot.
+            </p>
+
+            <div class="summary-card">
+                <div class="summary-row">
+                    <span class="summary-label">API Key</span>
+                    <span class="summary-value" id="summary-api">***</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Webhook</span>
+                    <span class="summary-value" id="summary-webhook">-</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Base Spread</span>
+                    <span class="summary-value" id="summary-spread">5%</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Order Size</span>
+                    <span class="summary-value" id="summary-target">10 Iron</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Dry Run</span>
+                    <span class="summary-value" id="summary-dryrun">Yes</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Markets</span>
+                    <span class="summary-value" id="summary-markets">2 selected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Success -->
+        <div class="step-content" id="step-5">
+            <div class="success-message">
+                <div class="success-icon">✅</div>
+                <h2>Setup Complete!</h2>
+                <p class="description" style="margin-top: 16px">
+                    Your configuration has been saved. The bot is starting...
+                </p>
+                <button class="btn-primary" onclick="window.location.href='/dashboard'" style="margin-top: 20px">
+                    Open Dashboard →
+                </button>
+            </div>
+        </div>
+
+        <div class="buttons" id="nav-buttons">
+            <button class="btn-secondary" id="btn-back" onclick="prevStep()" style="display: none">← Back</button>
+            <button class="btn-primary" id="btn-next" onclick="nextStep()">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Slider value updates
+        document.getElementById('base_spread').addEventListener('input', (e) => {
+            document.getElementById('spread-value').textContent = e.target.value + '%';
+        });
+
+        document.getElementById('target_value').addEventListener('input', (e) => {
+            document.getElementById('target-value').textContent = e.target.value + ' Iron';
+        });
+
+        // All markets toggle
+        document.getElementById('all_markets').addEventListener('change', (e) => {
+            const grid = document.getElementById('market-grid');
+            grid.style.opacity = e.target.checked ? '0.5' : '1';
+            grid.style.pointerEvents = e.target.checked ? 'none' : 'auto';
+        });
+
+        function showStep(step) {
+            // Update dots
+            document.querySelectorAll('.step-dot').forEach((dot, i) => {
+                dot.classList.remove('active', 'completed');
+                if (i + 1 < step) dot.classList.add('completed');
+                if (i + 1 === step) dot.classList.add('active');
+            });
+
+            // Update content
+            document.querySelectorAll('.step-content').forEach((content, i) => {
+                content.classList.remove('active');
+                if (i + 1 === step) content.classList.add('active');
+            });
+
+            // Update buttons
+            document.getElementById('btn-back').style.display = step > 1 && step <= totalSteps ? 'block' : 'none';
+            document.getElementById('btn-next').textContent = step === totalSteps ? 'Finish ✓' : 'Next →';
+            document.getElementById('nav-buttons').style.display = step > totalSteps ? 'none' : 'flex';
+
+            // Update summary on step 4
+            if (step === 4) {
+                updateSummary();
+            }
+        }
+
+        function updateSummary() {
+            const apiKey = document.getElementById('api_key').value;
+            document.getElementById('summary-api').textContent = apiKey ? '****' + apiKey.slice(-4) : 'Not set';
+            document.getElementById('summary-webhook').textContent = document.getElementById('webhook_url').value ? 'Configured' : 'Not set';
+            document.getElementById('summary-spread').textContent = document.getElementById('base_spread').value + '%';
+            document.getElementById('summary-target').textContent = document.getElementById('target_value').value + ' Iron';
+            document.getElementById('summary-dryrun').textContent = document.getElementById('dry_run').checked ? 'Yes (safe mode)' : 'No (real orders!)';
+
+            const allMarkets = document.getElementById('all_markets').checked;
+            if (allMarkets) {
+                document.getElementById('summary-markets').textContent = 'All markets';
+            } else {
+                const selected = document.querySelectorAll('input[name="market"]:checked');
+                document.getElementById('summary-markets').textContent = selected.length + ' selected';
+            }
+        }
+
+        function validateStep() {
+            const error = document.getElementById('error-message');
+            error.style.display = 'none';
+
+            if (currentStep === 1) {
+                const apiKey = document.getElementById('api_key').value.trim();
+                if (!apiKey) {
+                    error.textContent = 'API Key is required';
+                    error.style.display = 'block';
+                    return false;
+                }
+                if (apiKey.length < 10) {
+                    error.textContent = 'API Key seems too short';
+                    error.style.display = 'block';
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function nextStep() {
+            if (!validateStep()) return;
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            } else {
+                // Submit
+                submitSetup();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        async function submitSetup() {
+            const btn = document.getElementById('btn-next');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            // Gather data
+            const allMarkets = document.getElementById('all_markets').checked;
+            let enabledMarkets = [];
+            if (!allMarkets) {
+                document.querySelectorAll('input[name="market"]:checked').forEach(el => {
+                    enabledMarkets.push(el.value);
+                });
+            }
+
+            const data = {
+                api_key: document.getElementById('api_key').value.trim(),
+                webhook_url: document.getElementById('webhook_url').value.trim(),
+                base_spread: parseFloat(document.getElementById('base_spread').value) / 100,
+                target_value: parseFloat(document.getElementById('target_value').value),
+                dry_run: document.getElementById('dry_run').checked,
+                enabled_markets: enabledMarkets
+            };
+
+            try {
+                const response = await fetch('/api/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    currentStep = 5;
+                    showStep(5);
+                } else {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Setup failed');
+                }
+            } catch (e) {
+                const error = document.getElementById('error-message');
+                error.textContent = e.message;
+                error.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Finish ✓';
+            }
+        }
+    </script>
+</body>
+
+</html>

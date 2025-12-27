@@ -6,6 +6,7 @@
 diam_iron:
   description: "Diamond - Highest value commodity, best liquidity"
   base_price: 50.0
+  target_spread: 0.03  # 3% spread for high-liquidity market
   avg_spread: 3.05%
   volatility: low
   volume_rank: 1
@@ -16,6 +17,7 @@ diam_iron:
 gold_iron:
   description: "Gold - Second highest value, good liquidity"
   base_price: 5.0
+  target_spread: 0.03  # 3% spread for high-liquidity market
   avg_spread: 3.05%
   volatility: medium
   volume_rank: 2
@@ -26,6 +28,7 @@ gold_iron:
 lapi_iron:
   description: "Lapis Lazuli - Mid-tier value block"
   base_price: 2.0
+  target_spread: 0.04  # 4% spread for mid-liquidity market
   avg_spread: 3.05%
   volatility: low
   volume_rank: 5
@@ -157,6 +160,7 @@ sugr_iron:
 slme_iron:
   description: "Slime Ball - Special drop from slimes"
   base_price: 5.0
+  target_spread: 0.03  # 3% spread for valuable item
   avg_spread: 3.05%
   volatility: medium
   volume_rank: 4

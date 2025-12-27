@@ -2,6 +2,7 @@
 Trading helper functions extracted from the main MarketMaker class.
 These functions handle specific trading logic components for better testability.
 """
+import random
 from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 import logging
@@ -61,7 +62,8 @@ def apply_pennying(
     min_spread_ticks: float = 0.01
 ) -> Tuple[float, float]:
     """
-    Apply pennying strategy to beat competitors by 0.01.
+    Apply pennying strategy to beat competitors with randomized jitter.
+    Uses random value between 0.01-0.05 to avoid predictable penny wars.
     
     Args:
         buy_price: Initial buy price
@@ -100,7 +102,9 @@ def apply_pennying(
         
         if best_bid > buy_price and best_bid < MAX_BUY:
             if not is_our_bid:
-                buy_price = best_bid + 0.01
+                # Randomized penny to avoid predictable penny wars
+                penny_jitter = round(random.uniform(0.01, 0.05), 2)
+                buy_price = best_bid + penny_jitter
             else:
                 buy_price = best_bid
         
@@ -109,7 +113,9 @@ def apply_pennying(
         
         if best_ask > 0 and (best_ask < sell_price or sell_price == 0) and best_ask > MIN_SELL:
             if not is_our_ask:
-                sell_price = best_ask - 0.01
+                # Randomized penny to avoid predictable penny wars
+                penny_jitter = round(random.uniform(0.01, 0.05), 2)
+                sell_price = best_ask - penny_jitter
             else:
                 sell_price = best_ask
     

@@ -265,6 +265,8 @@ class MarketMaker:
             "market": market,
             "best_ask": best_ask,
             "best_bid": best_bid,
+            "bid": best_bid,   # For pennying compatibility
+            "ask": best_ask,   # For pennying compatibility
             "last": last,
             "mid": mid,
             "from_cache": True  # Flag indicating this is from cache
@@ -522,15 +524,31 @@ class MarketMaker:
                 # Essential to prevent Stale Wallet + Open Order = Double Count
                 await self._update_wallets()
 
-                # 1. Calculate Fair Price
-                mid_price = await self.price_model.calculate_fair_price(market)
+                # 1. Calculate Fair Price - PRIORITY: Orderbook > Ticker > Scarcity Model
+                # This ensures we react to current market conditions, not stale trades
+                mid_price = 0.0
+                orderbook_data = self._get_ticker_from_cache(market)
                 
-                # Fallback to ticker
+                # Priority 1: Use orderbook mid-price (most responsive to competition)
+                if orderbook_data and orderbook_data.get("mid", 0) > 0:
+                    mid_price = orderbook_data["mid"]
+                    logger.debug(f"{market}: Using orderbook mid-price: {mid_price:.2f}")
+                    # Also use orderbook for ticker if available (for pennying)
+                    if ticker is None:
+                        ticker = orderbook_data
+                
+                # Priority 2: Use ticker from API if orderbook not available
                 if mid_price <= 0 and ticker:
-                     mid_price = float(ticker.get("close", 0) or ticker.get("last", 0) or 0)
-                elif mid_price <= 0:
-                     t = await self.client.get_ticker(market)
-                     mid_price = float(t.get("close", 0))
+                    mid_price = float(ticker.get("close", 0) or ticker.get("last", 0) or 0)
+                
+                # Priority 3: Fallback to scarcity model (for bootstrapping new markets)
+                if mid_price <= 0:
+                    mid_price = await self.price_model.calculate_fair_price(market)
+                
+                # Priority 4: Fetch ticker from API as last resort
+                if mid_price <= 0:
+                    t = await self.client.get_ticker(market)
+                    mid_price = float(t.get("close", 0))
     
                 if mid_price == 0:
                     return
@@ -832,13 +850,18 @@ class MarketMaker:
             total_iron_capital = iron_wallet + iron_locked_in_orders
             num_markets = len(self.markets)
             
-            # Use FIXED target_value from config instead of dynamic calculation
-            # This prevents order churn when capital fluctuates between cycles
-            self.dynamic_target_value = TARGET_VALUE
-            
+            # Calculate dynamic target value using capital allocator
+            # This scales order sizes based on available capital and market priority
             if config.capital_allocation.enabled and total_iron_capital > 0 and num_markets > 0:
-                # Just log for informational purposes, but don't use for order sizing
+                base_allocation, reserve, deployable = self.capital_allocator.calculate_allocation(
+                    total_iron_capital, num_markets
+                )
+                # Use calculated allocation as dynamic target value
+                self.dynamic_target_value = max(base_allocation, config.capital_allocation.min_order_value)
                 self.capital_allocator.log_allocation(total_iron_capital, num_markets)
+            else:
+                # Fallback to fixed target value
+                self.dynamic_target_value = TARGET_VALUE
             
             # Initialize local capital tracker for this batch
             tracker = self.wallets.copy()
