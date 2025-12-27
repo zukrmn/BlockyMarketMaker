@@ -117,6 +117,8 @@ class BlockyTrayApp:
                 self.loop.run_until_complete(bot_main())
             except Exception as e:
                 print(f"Bot error: {e}")
+                import traceback
+                traceback.print_exc()
             finally:
                 self.running = False
                 if self.loop:
@@ -125,6 +127,31 @@ class BlockyTrayApp:
         self.bot_thread = threading.Thread(target=run_bot, daemon=True)
         self.bot_thread.start()
         print("Bot started in background thread")
+    
+    def wait_for_server(self, url: str, timeout: int = 30) -> bool:
+        """Wait for HTTP server to be ready."""
+        import time
+        import urllib.request
+        import urllib.error
+        
+        print(f"Waiting for server at {url}...")
+        start = time.time()
+        
+        while time.time() - start < timeout:
+            try:
+                # Try to connect to server
+                urllib.request.urlopen(url, timeout=2)
+                print(f"Server ready after {time.time() - start:.1f}s")
+                return True
+            except urllib.error.URLError:
+                # Server not ready yet
+                time.sleep(0.5)
+            except Exception as e:
+                print(f"Connection check error: {e}")
+                time.sleep(0.5)
+        
+        print(f"Server not ready after {timeout}s")
+        return False
     
     def stop_bot(self):
         """Stop the bot gracefully."""
@@ -188,21 +215,21 @@ class BlockyTrayApp:
         """Main entry point."""
         print("BlockyMarketMaker starting...")
         
-        # Check if setup is needed
+        # Start bot first
+        self.start_bot()
+        
+        # Wait for server to be ready
+        server_ready = self.wait_for_server("http://localhost:8081/api/stats", timeout=30)
+        
+        if not server_ready:
+            print("WARNING: Server did not start in time. Try refreshing browser manually.")
+        
+        # Check if setup is needed and open appropriate page
         if self.needs_setup():
-            print("First-time setup required. Opening browser...")
-            # Start bot anyway (it will fail but dashboard will be available)
-            self.start_bot()
-            # Give it a moment to start the dashboard
-            import time
-            time.sleep(2)
-            # Open setup wizard
+            print("First-time setup required. Opening setup wizard...")
             webbrowser.open(self.SETUP_URL)
         else:
-            # Start bot and open dashboard
-            self.start_bot()
-            import time
-            time.sleep(2)
+            print("Opening dashboard...")
             webbrowser.open(self.DASHBOARD_URL)
         
         # Create and run system tray icon
